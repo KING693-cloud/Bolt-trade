@@ -1,22 +1,25 @@
 {
   "short_name": "Bolt Trade",
-  "name": "Bolt Trade: Secure Financial Gateway",
+  "name": "Bolt Trade: Secure Gateway",
   "icons": [
     {
       "src": "j.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "j.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "background_color": "#020617",
   "display": "standalone",
   "scope": "/",
   "theme_color": "#020617",
-  "description": "Premium Digital Asset Trading Platform"
+  "orientation": "portrait",
+  "description": "Premium Digital Standard for Secure Trading"
 }
