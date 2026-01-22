@@ -51,10 +51,13 @@
             box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
         }
 
+        /* Solomon - Circular Logo Fix */
         .app-logo { 
             width: 100px; 
             height: 100px; 
-            object-fit: contain; 
+            object-fit: cover; 
+            border-radius: 50%; /* Perfect Circle */
+            border: 2px solid var(--primary-gold);
             filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.3)); 
         }
         
@@ -132,7 +135,7 @@
         <p id="loaderText" class="mt-6 text-[9px] font-black uppercase tracking-[0.4em] gold-text">Validating Session</p>
     </div>
 
-    <div id="authContainer" class="w-full max-w-sm">
+    <div id="authContainer" class="w-full max-sm:max-w-xs">
         <div class="text-center mb-10">
             <img src="j.png" class="app-logo mx-auto mb-4" alt="Bolt Trade">
             <h1 class="text-3xl font-black gold-text uppercase tracking-tighter">Bolt Trade</h1>
@@ -189,11 +192,9 @@
         const splash = document.getElementById('splash');
         const authView = document.getElementById('authContainer');
 
-        // Solomon - Logic to handle existing user sessions
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 localStorage.setItem("activeUser", user.uid);
-                // Profile safety check
                 const userRef = doc(db, "users", user.uid);
                 const userSnap = await getDoc(userRef);
                 if (userSnap.exists()) {
@@ -202,9 +203,8 @@
             }
         });
 
-        window.addEventListener('DOMContentLoaded', async () => {
+        window.addEventListener('DOMContentLoaded', () => {
             const activeSessionId = localStorage.getItem("activeUser");
-            
             setTimeout(async () => {
                 if (activeSessionId) {
                     try {
@@ -261,16 +261,13 @@
             }
         };
 
-        // Solomon - Fixed Google Auth for Mobile Wrappers using Popup logic
         window.googleAuth = async () => {
             loader.style.display = 'flex';
             const provider = new GoogleAuthProvider();
             try {
-                // Using Popup instead of Redirect to prevent state loss in PWA/Median.co
                 const res = await signInWithPopup(auth, provider);
                 const userRef = doc(db, "users", res.user.uid);
                 const userDoc = await getDoc(userRef);
-                
                 if (!userDoc.exists()) {
                     await setDoc(userRef, { 
                         email: res.user.email, 
@@ -278,12 +275,10 @@
                         createdAt: new Date().toISOString()
                     });
                 }
-                
                 localStorage.setItem("activeUser", res.user.uid);
                 window.location.href = "info.html";
             } catch (err) { 
                 loader.style.display = 'none';
-                console.error(err);
                 alert("Auth Failed: " + err.message); 
             }
         };
