@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Boltrade Ledger | Elite Financial Terminal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --brand-gold: #D4AF37;
+            --deep-dark: #020617;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --danger: #ef4444;
+            --slate-900: #0f172a;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--deep-dark); 
+            color: white; 
+            margin: 0; padding: 0;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* DYNAMIC SUMMARY ARCHITECTURE */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding: 24px;
+        }
+
+        .summary-box {
+            background: linear-gradient(145deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 2.8rem;
+            padding: 28px 18px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .amount-text {
+            font-size: clamp(1rem, 5vw, 2rem); 
+            font-weight: 900;
+            line-height: 1.2;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #FFF 0%, #AAA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gold-amount {
+            background: linear-gradient(135deg, #D4AF37 0%, #F9E29C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* TRANSACTION CARD ENGINE */
+        .ledger-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 2.2rem;
+            padding: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .st-badge {
+            font-size: 8px;
+            font-weight: 900;
+            padding: 6px 14px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .st-pending { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+        .st-success { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .st-failed { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        .delete-trigger {
+            width: 38px; height: 38px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            display: flex; align-items: center; justify-content: center;
+            margin-right: 15px;
+        }
+
+        #confirmModal {
+            position: fixed; inset: 0; z-index: 9999;
+            display: none; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.92); backdrop-filter: blur(12px); padding: 24px;
+        }
+
+        .modal-body {
+            width: 100%; max-width: 400px; background: var(--slate-900);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 3.5rem; padding: 45px 35px;
+            text-align: center; transform: translateY(20px); transition: 0.4s;
+        }
+
+        #confirmModal.active .modal-body { transform: translateY(0); }
+
+        .tab-group {
+            display: flex; background: rgba(255, 255, 255, 0.03);
+            margin: 0 24px 24px 24px; border-radius: 2rem;
+            padding: 6px; border: 1px solid var(--glass-border);
+        }
+
+        .tab-trigger {
+            flex: 1; padding: 16px 0; font-size: 11px;
+            font-weight: 800; color: #64748b; border-radius: 1.5rem;
+        }
+
+        .tab-trigger.active { background: var(--brand-gold); color: #020617; }
+        ::-webkit-scrollbar { width: 0px; }
+    </style>
+</head>
+<body class="pb-32">
+
+    <div id="confirmModal">
+        <div class="modal-body">
+            <h3 class="text-2xl font-black uppercase italic mb-2">Discard Record?</h3>
+            <p class="text-[10px] text-gray-500 font-bold uppercase mb-10">Permanently remove from ledger.</p>
+            <div class="space-y-4">
+                <button id="finalDeleteBtn" class="w-full py-5 bg-red-600 rounded-[1.8rem] text-[11px] font-black uppercase text-white">Delete Permanently</button>
+                <button onclick="closeDeleteModal()" class="w-full py-5 bg-white/5 border border-white/5 rounded-[1.8rem] text-[11px] font-black text-gray-400">Keep Record</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="p-6 flex justify-between items-center sticky top-0 bg-[#020617]/80 backdrop-blur-lg z-40">
+        <button onclick="window.history.back()" class="w-14 h-14 rounded-[1.8rem] bg-white/5 flex items-center justify-center border border-white/5">
+            <i class="fas fa-chevron-left text-gray-500 text-sm"></i>
+        </button>
+        <div class="text-center">
+            <h1 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-600">Enterprise Ledger</h1>
+            <p id="statusNode" class="text-[7px] font-bold text-emerald-500/40 uppercase mt-1">Network Active</p>
+        </div>
+        <button onclick="location.reload()" class="w-14 h-14 rounded-[1.8rem] bg-white/5 flex items-center justify-center border border-white/5">
+            <i class="fas fa-redo-alt text-gray-500 text-xs"></i>
+        </button>
+    </header>
+
+    <section class="summary-grid">
+        <div class="summary-box">
+            <p id="labelPending" class="text-[9px] font-black text-gray-600 uppercase mb-4 tracking-widest">Expected Assets</p>
+            <span id="awaitingSum" class="amount-text">₦0.00</span>
+        </div>
+        <div class="summary-box">
+            <p id="labelCleared" class="text-[9px] font-black text-gray-600 uppercase mb-4 tracking-widest">Cleared Assets</p>
+            <span id="clearedSum" class="amount-text gold-amount">₦0.00</span>
+        </div>
+    </section>
+
+    <nav class="tab-group">
+        <button onclick="viewPane(0)" id="p0" class="tab-trigger active">ASSET HISTORY</button>
+        <button onclick="viewPane(1)" id="p1" class="tab-trigger">PAYOUT LOGS</button>
+    </nav>
+
+    <main id="giftPane" class="px-6"></main>
+    <main id="payoutPane" class="px-6 hidden"></main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3vDwtittQkvW6Bxseutk-ThHFkrF_K0c",
+            authDomain: "boltrade-40812.firebaseapp.com",
+            projectId: "boltrade-40812",
+            storageBucket: "boltrade-40812.firebasestorage.app",
+            messagingSenderId: "682083427899",
+            appId: "1:682083427899:web:07a8f74c04908dc8f8de1e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const user = localStorage.getItem("activeUser");
+
+        let currentTab = 0;
+        let ledgerData = { assets: [], payouts: [] };
+
+        window.viewPane = (i) => {
+            currentTab = i;
+            document.getElementById('giftPane').classList.toggle('hidden', i !== 0);
+            document.getElementById('payoutPane').classList.toggle('hidden', i !== 1);
+            document.getElementById('p0').classList.toggle('active', i === 0);
+            document.getElementById('p1').classList.toggle('active', i === 1);
+            updateSummary();
+        };
+
+        const updateSummary = () => {
+            const list = currentTab === 0 ? ledgerData.assets : ledgerData.payouts;
+            let pending = 0, cleared = 0;
+            
+            list.forEach(r => {
+                const amt = parseFloat(r.amountNaira || r.nairaValue || r.amount || 0);
+                if (r.status?.toUpperCase() === "APPROVED" || r.status?.toUpperCase() === "SUCCESS") {
+                    cleared += amt;
+                } else if (r.status?.toUpperCase() === "PENDING") {
+                    pending += amt;
+                }
+            });
+
+            document.getElementById('labelPending').innerText = currentTab === 0 ? "Expected Assets" : "Pending Payouts";
+            document.getElementById('labelCleared').innerText = currentTab === 0 ? "Cleared Assets" : "Total Paid";
+            document.getElementById('awaitingSum').innerText = "₦" + pending.toLocaleString();
+            document.getElementById('clearedSum').innerText = "₦" + cleared.toLocaleString();
+        };
+
+        // NEWEST FIRST SORTING ENGINE
+        const sortRecords = (arr) => {
+            return arr.sort((a, b) => {
+                const timeA = a.timestamp?.seconds || 0;
+                const timeB = b.timestamp?.seconds || 0;
+                return timeB - timeA; // Descending order: Newest at index 0
+            });
+        };
+
+        // SYNC ASSETS
+        onSnapshot(query(collection(db, "trades"), where("userId", "==", user)), (snap) => {
+            let unsorted = [];
+            snap.forEach(d => unsorted.push({ id: d.id, path: 'trades', ...d.data() }));
+            ledgerData.assets = sortRecords(unsorted);
+            renderPane('giftPane', ledgerData.assets);
+            if (currentTab === 0) updateSummary();
+        });
+
+        // SYNC PAYOUTS
+        onSnapshot(query(collection(db, "withdrawals"), where("userId", "==", user)), (snap) => {
+            let unsorted = [];
+            snap.forEach(d => unsorted.push({ id: d.id, path: 'withdrawals', ...d.data() }));
+            ledgerData.payouts = sortRecords(unsorted);
+            renderPane('payoutPane', ledgerData.payouts);
+            if (currentTab === 1) updateSummary();
+        });
+
+        const renderPane = (paneId, records) => {
+            const container = document.getElementById(paneId);
+            if (records.length === 0) {
+                container.innerHTML = `<div class="py-20 text-center opacity-10 uppercase text-[9px] font-black">Empty Ledger</div>`;
+                return;
+            }
+            
+            let html = "";
+            records.forEach(r => {
+                const status = (r.status || "Pending").toUpperCase();
+                const amt = parseFloat(r.amountNaira || r.nairaValue || r.amount || 0);
+                const sClass = (status === "APPROVED" || status === "SUCCESS") ? "st-success" : (status === "REJECTED" || status === "FAILED") ? "st-failed" : "st-pending";
+
+                html += `
+                    <div class="ledger-card">
+                        <div class="flex items-center">
+                            <button onclick="openDeleteModal(event, '${r.id}', '${r.path}')" class="delete-trigger">
+                                <i class="fas fa-trash-alt text-[10px]"></i>
+                            </button>
+                            <div>
+                                <h4 class="text-[11px] font-black text-white uppercase">${r.assetName || r.bankName || 'RECORD'}</h4>
+                                <p class="text-[7px] font-bold text-gray-700 mt-1">REF: ${r.id.slice(0,10)}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[14px] font-black italic">₦${amt.toLocaleString()}</p>
+                            <span class="st-badge ${sClass}">${status}</span>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        };
+
+        let deleteRef = null;
+        window.openDeleteModal = (e, id, path) => {
+            e.stopPropagation();
+            deleteRef = { id, path };
+            document.getElementById('confirmModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('confirmModal').classList.add('active'), 10);
+        };
+
+        window.closeDeleteModal = () => {
+            document.getElementById('confirmModal').classList.remove('active');
+            setTimeout(() => document.getElementById('confirmModal').style.display = 'none', 300);
+        };
+
+        document.getElementById('finalDeleteBtn').onclick = async () => {
+            if (deleteRef) {
+                await deleteDoc(doc(db, deleteRef.path, deleteRef.id));
+                closeDeleteModal();
+            }
+        };
+
+        viewPane(0);
+    </script>
+</body>
+</html>

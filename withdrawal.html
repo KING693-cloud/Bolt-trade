@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Boltrade | Enterprise Settlement Terminal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        
+        :root {
+            --brand-gold: #D4AF37;
+            --deep-dark: #020617;
+            --error-red: #ef4444;
+            --success-green: #10b981;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--deep-dark); 
+            color: white; 
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 100px;
+        }
+
+        /* TYPOGRAPHY */
+        .gold-text { background: linear-gradient(135deg, #D4AF37 0%, #F9E29C 50%, #B8860B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gold-bg { background: linear-gradient(135deg, #D4AF37 0%, #F9E29C 100%); }
+        
+        /* BOX ARCHITECTURE */
+        .glass-card { 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 3.5rem; 
+            padding: 3.5rem;
+            margin-bottom: 2.5rem;
+            overflow: hidden; /* Solomon: Contains the content */
+        }
+
+        /* DYNAMIC AMOUNT FITTING */
+        #balanceText {
+            font-size: clamp(1.8rem, 10vw, 3.75rem); /* Solomon: Scales based on screen & length */
+            font-weight: 900;
+            line-height: 1.1;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            display: block;
+            width: 100%;
+        }
+
+        /* EXPANSIVE INPUTS */
+        .input-group { margin-bottom: 3.5rem; }
+        
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            margin-bottom: 1.2rem;
+            margin-left: 1.5rem;
+        }
+
+        input, select { 
+            background: rgba(30, 41, 59, 0.3) !important; 
+            border: 2px solid rgba(255, 255, 255, 0.03) !important; 
+            color: white !important; 
+            outline: none; 
+            width: 100%;
+            padding: 1.8rem 2.2rem;
+            border-radius: 2rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus { 
+            border-color: var(--brand-gold) !important; 
+            background: rgba(212, 175, 55, 0.02) !important;
+            transform: translateY(-2px);
+        }
+
+        /* VALIDATION REASONING */
+        .validation-msg {
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 0.8rem;
+            margin-left: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: none;
+        }
+        .msg-error { color: var(--error-red); }
+        .msg-success { color: var(--success-green); }
+
+        /* BUTTONS */
+        .main-btn {
+            width: 100%;
+            height: 6.5rem;
+            border-radius: 2.5rem;
+            font-weight: 900;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5em;
+            transition: all 0.4s;
+        }
+
+        #confirmOverlay { 
+            background: rgba(0,0,0,0.95); 
+            backdrop-filter: blur(15px); 
+            z-index: 1000; 
+            display: none;
+            position: fixed;
+            inset: 0;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* HIDE ARROWS */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body class="p-6">
+
+    <header class="flex items-center justify-between mt-10 mb-16 max-w-2xl mx-auto">
+        <button onclick="window.history.back()" class="w-16 h-16 flex items-center justify-center bg-white/5 rounded-3xl border border-white/5">
+            <i class="fas fa-chevron-left text-gray-400"></i>
+        </button>
+        <div class="text-center">
+            <h1 class="text-[10px] font-black text-gray-500 tracking-[0.6em] uppercase">Settlement Portal</h1>
+            <p class="gold-text font-black text-xs mt-1">Enterprise Secure Node</p>
+        </div>
+        <div class="w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center border border-white/5">
+            <i class="fas fa-fingerprint text-brand-gold"></i>
+        </div>
+    </header>
+
+    <div class="max-w-2xl mx-auto">
+        <section class="glass-card text-center">
+            <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Available Liquidity</p>
+            <h2 id="balanceText" class="gold-text italic tracking-tighter">₦0.00</h2>
+        </section>
+
+        <section class="glass-card">
+            <div class="input-group">
+                <label>Routing Institution</label>
+                <select id="bankNode">
+                    <option value="">SCANNING NETWORK BANKS...</option>
+                    <option value="Access Bank">Access Bank</option>
+                    <option value="GTBank">Guaranty Trust Bank</option>
+                    <option value="Zenith Bank">Zenith Bank</option>
+                    <option value="Opay">OPay (Digital Services)</option>
+                    <option value="Palmpay">PalmPay</option>
+                    <option value="Kuda Bank">Kuda Bank</option>
+                    <option value="Fidelity Bank">Fidelity Bank</option>
+                    <option value="First Bank">First Bank of Nigeria</option>
+                    <option value="FCMB">First City Monument Bank</option>
+                    <option value="Moniepoint">Moniepoint MFB</option>
+                    <option value="United Bank for Africa">UBA</option>
+                    <option value="Union Bank">Union Bank</option>
+                    <option value="Wema Bank">Wema Bank</option>
+                    <option value="Stanbic IBTC">Stanbic IBTC</option>
+                    <option value="Sterling Bank">Sterling Bank</option>
+                    <option value="Polaris Bank">Polaris Bank</option>
+                    <option value="Keystone Bank">Keystone Bank</option>
+                    <option value="Standard Chartered">Standard Chartered</option>
+                    <option value="Ecobank">Ecobank Nigeria</option>
+                    <option value="Heritage Bank">Heritage Bank</option>
+                    <option value="Providus Bank">Providus Bank</option>
+                    <option value="Unity Bank">Unity Bank</option>
+                    <option value="Jaiz Bank">Jaiz Bank</option>
+                    <option value="Globus Bank">Globus Bank</option>
+                    <option value="Titan Trust Bank">Titan Trust Bank</option>
+                    <option value="VFD Bank">VFD Microfinance</option>
+                    <option value="Lotus Bank">Lotus Bank</option>
+                    <option value="Premium Trust Bank">Premium Trust Bank</option>
+                    <option value="Parallex Bank">Parallex Bank</option>
+                    <option value="Suntrust Bank">Suntrust Bank</option>
+                </select>
+                <div id="bankError" class="validation-msg msg-error">Selection Required</div>
+            </div>
+
+            <div class="input-group">
+                <label>Account Identity</label>
+                <input type="number" id="accNumber" placeholder="10-DIGIT ACCOUNT NUMBER">
+                <div id="accError" class="validation-msg msg-error">Must be exactly 10 digits</div>
+            </div>
+
+            <div class="input-group">
+                <label>Beneficiary Name</label>
+                <input type="text" id="accName" placeholder="AS REGISTERED WITH BANK" class="uppercase">
+                <div id="nameError" class="validation-msg msg-error">First and Last name required (Spaced)</div>
+            </div>
+
+            <div class="input-group">
+                <label>Payout Amount (₦)</label>
+                <input type="number" id="payAmount" placeholder="MINIMUM 5,000">
+                <div id="amtError" class="validation-msg msg-error">Insufficient funds or below minimum</div>
+            </div>
+
+            <button id="submitTrigger" class="main-btn gold-bg text-black opacity-20 cursor-not-allowed" disabled>
+                Authorize Payout
+            </button>
+        </section>
+    </div>
+
+    <div id="confirmOverlay">
+        <div class="glass-card w-full max-w-sm p-10 space-y-10">
+            <div class="text-center">
+                <i class="fas fa-shield-check text-4xl gold-text mb-4"></i>
+                <h3 class="font-black text-xl uppercase tracking-widest">Verify Transfer</h3>
+            </div>
+            
+            <div class="space-y-5 text-[11px] font-bold">
+                <div class="flex justify-between border-b border-white/5 pb-3">
+                    <span class="text-gray-500 uppercase">Gateway</span>
+                    <span id="mBank" class="text-white">---</span>
+                </div>
+                <div class="flex justify-between border-b border-white/5 pb-3">
+                    <span class="text-gray-500 uppercase">Recipient</span>
+                    <span id="mAcc" class="text-white">---</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500 uppercase">Settlement</span>
+                    <span id="mTotal" class="text-emerald-400 text-lg">₦0.00</span>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="closeModal()" class="flex-1 py-5 bg-white/5 rounded-2xl text-[10px] font-black uppercase">Cancel</button>
+                <button id="finalPush" class="flex-1 py-5 gold-bg text-black rounded-2xl text-[10px] font-black uppercase">Execute</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, addDoc, collection, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3vDwtittQkvW6Bxseutk-ThHFkrF_K0c",
+            authDomain: "boltrade-40812.firebaseapp.com",
+            projectId: "boltrade-40812",
+            storageBucket: "boltrade-40812.firebasestorage.app",
+            messagingSenderId: "682083427899",
+            appId: "1:682083427899:web:07a8f74c04908dc8f8de1e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        let userBalance = 0;
+        let activeId = localStorage.getItem("activeUser");
+
+        if (!activeId) window.location.href = "index.html";
+
+        // BALANCE SYNC Solomon
+        onSnapshot(doc(db, "users", activeId), (snap) => {
+            if (snap.exists()) {
+                userBalance = snap.data().balance || 0;
+                document.getElementById('balanceText').innerText = "₦" + userBalance.toLocaleString(undefined, {minimumFractionDigits: 2});
+            }
+        });
+
+        const inputs = {
+            bank: document.getElementById('bankNode'),
+            acc: document.getElementById('accNumber'),
+            name: document.getElementById('accName'),
+            amt: document.getElementById('payAmount')
+        };
+
+        const errors = {
+            bank: document.getElementById('bankError'),
+            acc: document.getElementById('accError'),
+            name: document.getElementById('nameError'),
+            amt: document.getElementById('amtError')
+        };
+
+        const btn = document.getElementById('submitTrigger');
+
+        const validateField = (field) => {
+            let valid = true;
+            const val = inputs[field].value.trim();
+
+            if (field === 'bank') {
+                valid = val !== "";
+            } else if (field === 'acc') {
+                valid = val.length === 10;
+            } else if (field === 'name') {
+                valid = val.split(/\s+/).filter(x => x.length > 0).length >= 2;
+            } else if (field === 'amt') {
+                const n = parseFloat(val);
+                valid = n >= 5000 && n <= userBalance;
+            }
+
+            errors[field].style.display = valid ? 'none' : 'block';
+            return valid;
+        };
+
+        const checkAll = () => {
+            const isBank = validateField('bank');
+            const isAcc = validateField('acc');
+            const isName = validateField('name');
+            const isAmt = validateField('amt');
+
+            if (isBank && isAcc && isName && isAmt) {
+                btn.disabled = false;
+                btn.classList.remove('opacity-20', 'cursor-not-allowed');
+            } else {
+                btn.disabled = true;
+                btn.classList.add('opacity-20', 'cursor-not-allowed');
+            }
+        };
+
+        Object.keys(inputs).forEach(key => {
+            inputs[key].addEventListener('blur', () => validateField(key));
+            inputs[key].addEventListener('input', checkAll);
+        });
+
+        window.closeModal = () => document.getElementById('confirmOverlay').style.display = 'none';
+
+        btn.onclick = () => {
+            document.getElementById('mBank').innerText = inputs.bank.value;
+            document.getElementById('mAcc').innerText = inputs.acc.value;
+            document.getElementById('mTotal').innerText = "₦" + parseFloat(inputs.amt.value).toLocaleString();
+            document.getElementById('confirmOverlay').style.display = 'flex';
+        };
+
+        document.getElementById('finalPush').onclick = async function() {
+            this.disabled = true;
+            this.innerText = "PROCESSING...";
+            const amount = parseFloat(inputs.amt.value);
+
+            try {
+                await addDoc(collection(db, "withdrawals"), {
+                    userId: activeId,
+                    amount: amount,
+                    bank: inputs.bank.value,
+                    accNo: inputs.acc.value,
+                    accName: inputs.name.value.toUpperCase(),
+                    status: "Pending",
+                    timestamp: serverTimestamp()
+                });
+
+                await updateDoc(doc(db, "users", activeId), {
+                    balance: userBalance - amount
+                });
+
+                window.location.href = "dashboard.html";
+            } catch (e) {
+                alert("Error: " + e.message);
+                this.disabled = false;
+                this.innerText = "RETRY";
+            }
+        };
+    </script>
+</body>
+</html>

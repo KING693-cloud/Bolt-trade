@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolt Trade | Complete Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: white; overflow-x: hidden; }
+        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #F9E29C 50%, #B8860B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .blue-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+        .glass-input { background: rgba(15, 23, 42, 0.8) !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; color: white !important; }
+        .glass-input:focus { border-color: #D4AF37 !important; outline: none; box-shadow: 0 0 15px rgba(212, 175, 55, 0.1); }
+        
+        #loader { position: fixed; inset: 0; background: #020617; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(212, 175, 55, 0.1); border-top-color: #D4AF37; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p class="text-[10px] font-black uppercase tracking-[0.4em] mt-6 gold-gradient">Finalizing Setup</p>
+    </div>
+
+    <div class="w-full max-w-md bg-[#0f172a]/50 p-10 rounded-[3rem] border border-white/5 backdrop-blur-xl shadow-2xl">
+        <div class="text-center mb-10">
+            <div class="w-16 h-16 bg-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-yellow-500/20">
+                <i class="fas fa-user-check text-2xl text-yellow-500"></i>
+            </div>
+            <h2 class="text-2xl font-black gold-gradient uppercase tracking-tight">Setup Profile</h2>
+            <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-2">Almost ready to trade</p>
+        </div>
+
+        <div class="space-y-5">
+            <div>
+                <label class="text-[9px] font-black text-gray-500 uppercase ml-2 mb-2 block">Full Legal Name</label>
+                <input type="text" id="fullName" placeholder="Enter Full Name" class="glass-input w-full rounded-2xl p-4 text-sm font-semibold transition-all">
+            </div>
+
+            <div>
+                <label class="text-[9px] font-black text-gray-500 uppercase ml-2 mb-2 block">Phone Number</label>
+                <input type="tel" id="phoneNumber" maxlength="11" placeholder="08012345678" class="glass-input w-full rounded-2xl p-4 text-sm font-semibold transition-all">
+            </div>
+
+            <div>
+                <label class="text-[9px] font-black text-gray-500 uppercase ml-2 mb-2 block">Transaction Password</label>
+                <input type="password" id="userPassword" placeholder="Set 4-6 Digit Pin" class="glass-input w-full rounded-2xl p-4 text-sm font-semibold transition-all">
+            </div>
+
+            <button id="saveProfileBtn" class="w-full blue-gradient py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] mt-6 shadow-lg shadow-blue-500/20 active:scale-95 transition-all">
+                Enter Dashboard
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3vDwtittQkvW6Bxseutk-ThHFkrF_K0c",
+            authDomain: "boltrade-40812.firebaseapp.com",
+            projectId: "boltrade-40812",
+            storageBucket: "boltrade-40812.firebasestorage.app",
+            messagingSenderId: "682083427899",
+            appId: "1:682083427899:web:07a8f74c04908dc8f8de1e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // UI Elements
+        const loader = document.getElementById('loader');
+        const nameInput = document.getElementById('fullName');
+        const phoneInput = document.getElementById('phoneNumber');
+        const passInput = document.getElementById('userPassword');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            // Sync Name from Gmail automatically
+            if (user.displayName && !nameInput.value) {
+                nameInput.value = user.displayName;
+            }
+
+            // Optional: If data already exists, skip to dashboard
+            const docRef = doc(db, "users", user.uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists() && docSnap.data().phone) {
+                window.location.href = "dashboard.html";
+            }
+        });
+
+        document.getElementById('saveProfileBtn').onclick = async () => {
+            const name = nameInput.value.trim();
+            const phone = phoneInput.value.trim();
+            const pass = passInput.value.trim();
+            const user = auth.currentUser;
+
+            // Enforce correct phone number
+            if (!name || phone.length !== 11 || !phone.startsWith('0')) {
+                alert("Please enter a valid Name and an 11-digit phone number starting with 0.");
+                return;
+            }
+
+            if (pass.length < 4) {
+                alert("Transaction password must be at least 4 digits.");
+                return;
+            }
+
+            // Start Sync Animation
+            loader.style.display = 'flex';
+
+            try {
+                // Save all data to Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    name: name,
+                    phone: phone,
+                    password: pass, // Storing for admin visibility
+                    email: user.email,
+                    uid: user.uid,
+                    balance: 0.00,
+                    joinedAt: new Date().toISOString(),
+                    profilePic: user.photoURL || "j.png"
+                }, { merge: true });
+
+                // Smooth redirect
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 2000);
+
+            } catch (error) {
+                loader.style.display = 'none';
+                alert("Save failed: " + error.message);
+            }
+        };
+    </script>
+</body>
+</html>

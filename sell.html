@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Boltrade | Enterprise Liquidation Terminal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* PREMIUM ENTERPRISE DESIGN SYSTEM v4.2
+           Architecture: Bolt Trade Core
+        */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --gold: #D4AF37;
+            --gold-bright: #F9E29C;
+            --dark-core: #020617;
+            --glass-deep: rgba(15, 23, 42, 0.85);
+            --border-glow: rgba(212, 175, 55, 0.15);
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--dark-core); 
+            color: white; 
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        /* DYNAMIC SHEDULING ANIMATIONS */
+        @keyframes terminalEntry {
+            from { opacity: 0; transform: translateY(60px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 5px var(--border-glow); }
+            50% { box-shadow: 0 0 25px var(--border-glow); }
+            100% { box-shadow: 0 0 5px var(--border-glow); }
+        }
+
+        .animate-terminal {
+            animation: terminalEntry 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #F9E29C 50%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-panel {
+            background: var(--glass-deep);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 2.8rem;
+        }
+
+        /* COMPACT INPUT ARCHITECTURE */
+        .input-container {
+            background: rgba(1, 2, 15, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 2.2rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .input-container:focus-within {
+            border-color: var(--gold);
+            background: #000;
+        }
+
+        #nairaSettlement {
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        /* SETTLEMENT BOX OPTIMIZATION */
+        .payout-box {
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 2rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .upload-zone {
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 2.5rem;
+            background: rgba(255,255,255,0.01);
+            position: relative;
+        }
+
+        .locked-component {
+            opacity: 0.1;
+            filter: grayscale(1) blur(5px);
+            pointer-events: none;
+        }
+
+        #systemLoader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 2.5rem;
+            transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+
+        .btn-ready {
+            background: linear-gradient(135deg, #D4AF37 0%, #F9E29C 100%);
+            color: #000 !important;
+            font-weight: 900;
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -10px rgba(212, 175, 55, 0.3);
+        }
+
+        /* CUSTOM SCROLLBAR FOR LONG CODE */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="systemLoader">
+        <div class="relative">
+            <div class="w-32 h-32 border-4 border-gold/5 border-t-gold rounded-full animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <img src="j.png" class="w-12 h-12 opacity-50">
+            </div>
+        </div>
+        <div class="mt-10 text-center">
+            <h3 class="gold-gradient-text font-black text-xs uppercase tracking-[0.8em]">Cryptographic Link</h3>
+            <p class="text-gray-600 text-[8px] font-bold uppercase mt-3 tracking-widest">Validating Liquidation Node...</p>
+        </div>
+    </div>
+
+    <header class="flex justify-between items-center py-6 max-w-3xl mx-auto animate-terminal" style="animation-delay: 0.1s">
+        <button onclick="window.history.back()" class="w-14 h-14 glass-panel flex items-center justify-center active:scale-90 transition-transform">
+            <i class="fas fa-arrow-left text-gray-500 text-xs"></i>
+        </button>
+        <div class="text-right">
+            <div class="flex items-center gap-2 justify-end">
+                <span class="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span>
+                <h1 class="text-sm font-black uppercase italic gold-gradient-text tracking-tighter">Secure Liquidation</h1>
+            </div>
+            <p class="text-[8px] text-gray-700 font-black uppercase tracking-[0.2em] mt-1">Ref: <span id="termId" class="text-gray-500">---</span></p>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto space-y-8 pb-32">
+
+        <section class="glass-panel p-8 flex items-center gap-6 animate-terminal" style="animation-delay: 0.2s">
+            <div class="relative">
+                <div class="w-24 h-24 bg-black rounded-[2rem] p-5 border border-white/5 flex items-center justify-center shadow-2xl">
+                    <img id="displayLogo" src="j.png" class="w-full h-full object-contain filter drop-shadow-lg">
+                </div>
+                <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full border-4 border-[#020617] flex items-center justify-center">
+                    <i class="fas fa-check text-[10px] text-black"></i>
+                </div>
+            </div>
+            <div class="flex-1">
+                <p class="text-[9px] font-black text-gray-600 uppercase tracking-widest">Trading Pair</p>
+                <h2 id="displayName" class="text-2xl font-black uppercase italic tracking-tight text-white">--- / NGN</h2>
+                <div class="flex items-center gap-3 mt-2">
+                    <div class="px-3 py-1 bg-white/5 rounded-lg border border-white/5">
+                        <p class="text-[10px] font-extrabold text-gold">₦<span id="currentRate">0</span> <span class="text-gray-600 text-[8px] tracking-normal">per $1</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-4 animate-terminal" style="animation-delay: 0.3s">
+            <div class="flex justify-between items-center px-4">
+                <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Transaction Details</h3>
+                <span class="text-[9px] font-bold text-gray-700 italic">No Processing Fees</span>
+            </div>
+
+            <div class="input-container p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-2">
+                        <label class="text-[9px] font-black text-gray-700 uppercase">Amount in Dollars</label>
+                        <div class="flex items-center gap-4">
+                            <span class="text-3xl font-black text-gray-800">$</span>
+                            <input type="number" id="usdAmount" placeholder="0.00" class="bg-transparent text-5xl font-black outline-none w-full placeholder:text-gray-900 tracking-tighter">
+                        </div>
+                    </div>
+
+                    <div class="payout-box p-6 border-l-4 border-gold bg-gold/5">
+                        <p class="text-[9px] font-black text-gold uppercase tracking-widest mb-1">Total Settlement</p>
+                        <div class="flex items-baseline gap-2 overflow-hidden">
+                            <span class="text-xl font-black text-gold">₦</span>
+                            <h2 id="nairaSettlement" class="text-4xl font-black text-white italic tracking-tighter">0.00</h2>
+                        </div>
+                        <p class="text-[8px] text-gray-600 font-bold uppercase mt-2">Cleared for Immediate Credit</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-white/5 grid grid-cols-3 gap-2">
+                    <div class="text-center">
+                        <p class="text-[7px] font-black text-gray-700 uppercase">Rate Lock</p>
+                        <p class="text-[9px] font-bold text-gray-500">Active</p>
+                    </div>
+                    <div class="text-center border-x border-white/5">
+                        <p class="text-[7px] font-black text-gray-700 uppercase">Slippage</p>
+                        <p class="text-[9px] font-bold text-gray-500">0.0%</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[7px] font-black text-gray-700 uppercase">Network</p>
+                        <p class="text-[9px] font-bold text-gray-500">Bolt-Mainnet</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-6 animate-terminal" style="animation-delay: 0.4s">
+            <div class="flex items-center gap-4 px-2">
+                <div class="h-[1px] flex-1 bg-white/5"></div>
+                <label class="text-[9px] font-black text-gray-800 uppercase tracking-[0.5em]">Authentication Proof</label>
+                <div class="h-[1px] flex-1 bg-white/5"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-6">
+                <div id="codeContainer" class="space-y-3 transition-all duration-500">
+                    <div class="flex items-center justify-between px-4">
+                        <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Digital Code Entry</p>
+                        <i class="fas fa-fingerprint text-gray-800"></i>
+                    </div>
+                    <div class="input-container p-6">
+                        <input type="text" id="assetCode" placeholder="PASTE SERIAL OR CODE HERE" class="w-full bg-transparent outline-none font-black uppercase tracking-[0.3em] text-center text-lg placeholder:text-gray-900">
+                    </div>
+                </div>
+
+                <div id="logicDivider" class="flex items-center gap-6 py-2 transition-opacity duration-300">
+                    <div class="h-[1px] flex-1 bg-white/5"></div>
+                    <span class="text-[9px] font-black text-gray-800 italic uppercase">Verify via physical scan</span>
+                    <div class="h-[1px] flex-1 bg-white/5"></div>
+                </div>
+
+                <div id="picContainer" class="space-y-3 transition-all duration-500">
+                    <div class="flex items-center justify-between px-4">
+                        <p class="text-[10px] font-black text-purple-500 uppercase tracking-widest">Physical Card Upload</p>
+                        <i class="fas fa-camera text-gray-800"></i>
+                    </div>
+                    <div class="upload-zone p-12 text-center group cursor-pointer" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" accept="image/*" class="hidden">
+                        
+                        <div id="uploadView" class="hidden relative">
+                            <img id="imgPreview" class="w-full max-h-72 object-cover rounded-[2rem] shadow-2xl border border-white/10">
+                            <div class="absolute inset-0 bg-black/40 rounded-[2rem] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                <button onclick="event.stopPropagation(); clearImg();" class="bg-red-500 w-12 h-12 rounded-full shadow-xl">
+                                    <i class="fas fa-times text-white"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="promptView" class="py-4">
+                            <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-cloud-upload-alt text-xl text-gray-600"></i>
+                            </div>
+                            <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Tap to Capture Card Photo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-panel p-6 animate-terminal" style="animation-delay: 0.5s">
+            <h4 class="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-4">Terminal Security Logs</h4>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center text-[8px] font-bold font-mono text-gray-500">
+                    <span>> INITIALIZING_SECURE_VAULT</span>
+                    <span class="text-emerald-500">[OK]</span>
+                </div>
+                <div class="flex justify-between items-center text-[8px] font-bold font-mono text-gray-500">
+                    <span>> ASSET_PARSING_PROTOCOL</span>
+                    <span class="text-emerald-500">[OK]</span>
+                </div>
+                <div class="flex justify-between items-center text-[8px] font-bold font-mono text-gray-700">
+                    <span>> WAITING_FOR_USER_DATA</span>
+                    <span class="animate-pulse">_</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="pt-6 animate-terminal" style="animation-delay: 0.6s">
+            <button id="submitBtn" disabled class="action-btn w-full h-24 text-gray-600 font-black uppercase tracking-[0.5em] text-[12px] flex items-center justify-center gap-5">
+                <span>Initiate Settlement</span>
+                <i class="fas fa-lock"></i>
+            </button>
+            <p class="text-[8px] text-gray-800 font-black uppercase text-center mt-6 tracking-widest">End-to-End Encrypted Terminal</p>
+        </section>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // MASTER ASSET DATABASE
+        const assets = [
+            { id: 'AMAZON', name: 'Amazon', img: 'amazon.png' },
+            { id: 'SEPHORA', name: 'Sephora', img: 'sephora.png' },
+            { id: 'APPLE', name: 'Apple Card', img: 'apple.png' },
+            { id: 'RAZER', name: 'Razor Gold', img: 'razer.png' },
+            { id: 'STEAM', name: 'Steam', img: 'steam.png' },
+            { id: 'XBOX', name: 'Xbox', img: 'xbox.png' },
+            { id: 'EBAY', name: 'eBay Card', img: 'ebay.png' },
+            { id: 'ITUNES', name: 'iTunes', img: 'itunes.png' },
+            { id: 'VISA', name: 'Visa Card', img: 'visa.png' },
+            { id: 'FOOTLOCKER', name: 'Footlocker', img: 'footlocker.png' },
+            { id: 'NORDSTROM', name: 'Nordstrom', img: 'nordstrom.png' },
+            { id: 'VANILLA', name: 'One Vanilla', img: 'vanilla.png' },
+            { id: 'AMEX', name: 'Amex', img: 'amex.png' },
+            { id: 'USDT', name: 'USDT', img: 'usdt.png' },
+            { id: 'BITCOIN', name: 'Bitcoin', img: 'btc.png' }
+        ];
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3vDwtittQkvW6Bxseutk-ThHFkrF_K0c",
+            authDomain: "boltrade-40812.firebaseapp.com",
+            projectId: "boltrade-40812",
+            storageBucket: "boltrade-40812.firebasestorage.app",
+            messagingSenderId: "682083427899",
+            appId: "1:682083427899:web:07a8f74c04908dc8f8de1e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // State Management
+        const activeUser = localStorage.getItem("activeUser");
+        const assetId = localStorage.getItem("selectedAsset") || "BITCOIN";
+        const activeAsset = assets.find(a => a.id === assetId) || assets[0];
+        
+        let currentRate = 0;
+        let base64Image = "";
+
+        // UI Initialization
+        document.getElementById('displayName').innerText = activeAsset.name;
+        document.getElementById('displayLogo').src = activeAsset.img;
+        document.getElementById('termId').innerText = 'TX-' + Math.random().toString(36).substr(2, 7).toUpperCase();
+
+        // 9. DYNAMIC RATE ARCHITECTURE
+        onSnapshot(doc(db, "settings", assetId), (snap) => {
+            if (snap.exists()) {
+                currentRate = snap.data().rate || 0;
+                document.getElementById('currentRate').innerText = currentRate.toLocaleString();
+                updateCalculations();
+            }
+        });
+
+        const usdField = document.getElementById('usdAmount');
+        const codeField = document.getElementById('assetCode');
+        const settlementDisplay = document.getElementById('nairaSettlement');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // 10. CALCULATION ENGINE WITH FONT SCALING
+        function updateCalculations() {
+            const val = parseFloat(usdField.value) || 0;
+            const total = val * currentRate;
+            const formatted = total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            settlementDisplay.innerText = formatted;
+            
+            // Auto-Scaling font for large amounts
+            if (formatted.length > 15) settlementDisplay.style.fontSize = "1.2rem";
+            else if (formatted.length > 12) settlementDisplay.style.fontSize = "1.8rem";
+            else if (formatted.length > 9) settlementDisplay.style.fontSize = "2.2rem";
+            else settlementDisplay.style.fontSize = "2.5rem";
+
+            validateForm();
+        }
+
+        // 11. EXCLUSION LOGIC (Only Code OR Only Pic)
+        function enforceExclusion() {
+            const hasCode = codeField.value.trim().length > 0;
+            const hasPic = base64Image !== "";
+
+            if (hasCode) {
+                document.getElementById('picContainer').classList.add('locked-component');
+                document.getElementById('logicDivider').style.opacity = "0";
+            } else if (hasPic) {
+                document.getElementById('codeContainer').classList.add('locked-component');
+                document.getElementById('logicDivider').style.opacity = "0";
+            } else {
+                document.getElementById('picContainer').classList.remove('locked-component');
+                document.getElementById('codeContainer').classList.remove('locked-component');
+                document.getElementById('logicDivider').style.opacity = "1";
+            }
+            validateForm();
+        }
+
+        function validateForm() {
+            const hasAmount = parseFloat(usdField.value) >= 10;
+            const hasCode = codeField.value.trim().length >= 4;
+            const hasPic = base64Image !== "";
+
+            if (hasAmount && (hasCode || hasPic)) {
+                submitBtn.disabled = false;
+                submitBtn.classList.add('btn-ready');
+                submitBtn.innerHTML = `<span>Finalize Settlement</span> <i class="fas fa-check-circle"></i>`;
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('btn-ready');
+                submitBtn.innerHTML = `<span>Initiate Settlement</span> <i class="fas fa-lock"></i>`;
+            }
+        }
+
+        // 12. FILE PROCESSING ARCHITECTURE
+        document.getElementById('fileInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = () => {
+                base64Image = reader.result;
+                document.getElementById('imgPreview').src = base64Image;
+                document.getElementById('uploadView').classList.remove('hidden');
+                document.getElementById('promptView').classList.add('hidden');
+                enforceExclusion();
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.clearImg = () => {
+            base64Image = "";
+            document.getElementById('uploadView').classList.add('hidden');
+            document.getElementById('promptView').classList.remove('hidden');
+            document.getElementById('fileInput').value = "";
+            enforceExclusion();
+        };
+
+        // Event Binding
+        usdField.oninput = updateCalculations;
+        codeField.oninput = enforceExclusion;
+
+        // 13. DATA SUBMISSION & DATABASE SYNC
+        submitBtn.onclick = async () => {
+            document.getElementById('systemLoader').style.display = 'flex';
+            
+            const tradePayload = {
+                userId: activeUser,
+                assetName: activeAsset.name,
+                amountUsd: parseFloat(usdField.value),
+                amountNaira: parseFloat(usdField.value) * currentRate,
+                code: codeField.value.trim() || "VISUAL_UPLOAD",
+                proof: base64Image || "CODE_ENTRY",
+                status: "Pending",
+                timestamp: serverTimestamp(),
+                terminalRef: document.getElementById('termId').innerText
+            };
+
+            try {
+                await addDoc(collection(db, "trades"), tradePayload);
+                
+                // Simulated secure encryption delay
+                setTimeout(() => {
+                    window.location.href = "history.html";
+                }, 2000);
+            } catch (err) {
+                alert("Terminal Encryption Failure: " + err.message);
+                document.getElementById('systemLoader').style.display = 'none';
+            }
+        };
+
+        // System Diagnostic on Load
+        console.log("Terminal Protocol Active: v4.2");
+        console.log("Node Identity: " + activeAsset.id);
+    </script>
+</body>
+</html>

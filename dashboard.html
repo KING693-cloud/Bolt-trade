@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bolt Trade | Premium Exchange Terminal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* ENTERPRISE LEVEL PREMIUM DESIGN SYSTEM 
+           Author: Bolt Trade Engineering Group
+           Terminal Version: 4.0.2 (Secured & Optimized)
+        */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --gold-primary: #D4AF37;
+            --gold-light: #F9E29C;
+            --slate-deep: #020617;
+            --glass-bg: rgba(15, 23, 42, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-green: #10b981;
+            --error-red: #ef4444;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--slate-deep); 
+            color: white; 
+            -webkit-tap-highlight-color: transparent; 
+            overflow-x: hidden;
+            letter-spacing: -0.01em;
+            user-select: none;
+        }
+
+        /* DYNAMIC MONEY SCALING */
+        .balance-box {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 220px;
+        }
+
+        #userBalance {
+            display: inline-block;
+            white-space: nowrap;
+            font-size: 4rem; 
+            line-height: 1.1;
+            transition: font-size 0.3s ease;
+        }
+
+        .roll-loader {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: sync-engine-spin 0.6s linear infinite;
+        }
+
+        @keyframes sync-engine-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .gold-text { 
+            background: linear-gradient(135deg, #D4AF37 0%, #F9E29C 50%, #B8860B 100%); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+
+        .gold-bg { 
+            background: linear-gradient(135deg, #D4AF37 0%, #F9E29C 100%); 
+            box-shadow: 0 25px 50px -12px rgba(212, 175, 55, 0.25);
+        }
+
+        .glass-panel { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--card-border); 
+        }
+
+        .ticker-wrap { 
+            width: 100%; 
+            overflow: hidden; 
+            background: rgba(2, 6, 23, 0.98); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+            padding: 14px 0;
+            z-index: 1001;
+        }
+
+        .ticker { 
+            display: flex; 
+            white-space: nowrap; 
+            animation: ticker-slide 35s linear infinite; 
+        }
+
+        @keyframes ticker-slide { 
+            0% { transform: translateX(100%); } 
+            100% { transform: translateX(-180%); } 
+        }
+
+        .product-card { 
+            background: #0f172a; 
+            border: 1px solid #1e293b; 
+            border-radius: 2.2rem; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            cursor: pointer; 
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:active { transform: scale(0.92); }
+
+        .product-card img { 
+            width: 45px; 
+            height: 45px; 
+            object-fit: contain; 
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1e293b 25%, #2a384e 50%, #1e293b 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .nav-btn { transition: all 0.3s ease; color: #475569; }
+        .nav-btn.active { color: var(--gold-primary); }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(15px);
+            z-index: 9999;
+            padding: 24px;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="pb-44">
+
+    <div class="ticker-wrap sticky top-0">
+        <div class="ticker" id="liveTicker">
+            <span class="ticker-item px-10 font-black text-[9px] text-gray-500 uppercase tracking-[0.3em] italic">
+                Advanced Security Protocol: Enabled... AES-256 Tunnel Active... No Breaches Detected... Integrity Verified...
+            </span>
+        </div>
+    </div>
+
+    <header class="flex justify-between items-center p-6 border-b border-white/5 bg-[#020617]">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 shadow-xl">
+                <img src="j.png" class="w-9 h-9 object-contain" alt="Bolt">
+            </div>
+            <div class="overflow-hidden">
+                <p class="text-[8px] font-black text-gray-600 uppercase tracking-widest">Network Node</p>
+                <h2 id="displayUserName" class="text-sm font-bold text-white uppercase truncate max-w-[140px]">Syncing...</h2>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="openModal('logoutModal')" class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-gray-500 border border-white/10 active:bg-red-500/10">
+                <i class="fas fa-power-off text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="px-6 max-w-lg mx-auto mt-8 space-y-10">
+        
+        <div id="homeView" class="space-y-10">
+            <section class="gold-bg p-10 rounded-[3.5rem] text-slate-950 shadow-2xl relative overflow-hidden balance-box">
+                <div class="relative z-10">
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] opacity-60 mb-3">Portfolio Value</p>
+                    <h2 class="font-black italic tracking-tighter">
+                        <span class="text-xl mr-1">₦</span><span id="userBalance">0.00</span>
+                    </h2>
+                    <div class="flex gap-4 mt-12">
+                        <button onclick="window.location.href='withdrawal.html'" class="bg-slate-950 text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-95 shadow-lg">
+                            Withdraw
+                        </button>
+                    </div>
+                </div>
+                <i class="fas fa-piggy-bank absolute -right-6 -bottom-6 text-9xl opacity-5 rotate-12"></i>
+            </section>
+
+            <section class="grid grid-cols-2 gap-4">
+                <div class="glass-panel p-6 rounded-[2.2rem] border-white/5">
+                    <p class="text-[8px] font-black text-gray-600 uppercase tracking-widest mb-1">Trade Success</p>
+                    <p class="text-lg font-bold text-emerald-500">99.9%</p>
+                </div>
+                <div class="glass-panel p-6 rounded-[2.2rem] border-white/5">
+                    <p class="text-[8px] font-black text-gray-600 uppercase tracking-widest mb-1">Node Health</p>
+                    <p class="text-lg font-bold gold-text italic">Premium</p>
+                </div>
+            </section>
+
+            <section>
+                <div onclick="handleSupport()" id="supportBtn" class="glass-panel p-6 rounded-[2.5rem] border-green-500/20 flex items-center justify-between cursor-pointer active:scale-95 transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center">
+                            <i class="fab fa-whatsapp text-green-500 text-xl" id="supportIcon"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-[11px] font-black uppercase tracking-widest text-white">Live Assistance</h4>
+                            <p class="text-[9px] text-gray-500 font-bold" id="supportStatus">Encrypted Messaging Channel</p>
+                        </div>
+                    </div>
+                    <div id="supportRoll" class="roll-loader text-green-500"></div>
+                </div>
+            </section>
+
+            <section>
+                <div class="flex justify-between items-center mb-6 px-2">
+                    <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.4em]">Asset Market</h3>
+                    <div class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
+                        <span class="text-[8px] font-bold text-blue-500 uppercase">Live Feed</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-5" id="marketGrid"></div>
+            </section>
+
+            <section class="glass-panel p-8 rounded-[3rem] mb-20">
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Audit Trail</h3>
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="w-1 h-8 bg-gold-primary rounded-full"></div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-200">LOGIN_SUCCESS</p>
+                            <p class="text-[8px] text-gray-600 font-bold uppercase">Authorized Node • Secured</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 opacity-40">
+                        <div class="w-1 h-8 bg-gray-800 rounded-full"></div>
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400">DATABASE_SYNC</p>
+                            <p class="text-[8px] text-gray-600 font-bold uppercase">Cloud Relational • Stable</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div id="settingsView" class="hidden space-y-8 pb-32 pt-4">
+            <div class="text-center space-y-2">
+                <h2 class="text-3xl font-black gold-text italic tracking-tighter">SECURE VAULT</h2>
+                <p class="text-[9px] font-bold text-gray-600 uppercase tracking-[0.4em]">Automated Admin Management</p>
+            </div>
+
+            <div class="space-y-4">
+                <div onclick="window.location.href='history.html'" class="glass-panel p-8 rounded-[2.5rem] flex items-center justify-between active:bg-white/5">
+                    <div class="flex items-center gap-5">
+                        <i class="fas fa-fingerprint text-xl text-gold-primary"></i>
+                        <span class="text-[12px] font-black uppercase tracking-widest">Trade History</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-800"></i>
+                </div>
+
+                <div class="pt-10 border-t border-white/5">
+                    <p class="text-[10px] font-black text-red-500/50 uppercase text-center mb-6 tracking-widest">Danger Zone</p>
+                    <button onclick="openModal('deleteModal')" class="w-full bg-red-500/5 border border-red-500/10 p-8 rounded-[2.5rem] flex items-center justify-between group">
+                        <div class="flex items-center gap-5">
+                            <i class="fas fa-trash-alt text-red-500"></i>
+                            <span class="text-[12px] font-black uppercase tracking-widest text-red-500/80">Purge Account</span>
+                        </div>
+                        <i class="fas fa-biohazard text-red-500/20"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-10 left-6 right-6 max-w-lg mx-auto glass-panel rounded-[3rem] p-8 flex justify-around items-center z-[2000] border-white/10">
+        <button onclick="switchTab('home')" id="homeTab" class="nav-btn flex flex-col items-center gap-2 active">
+            <i class="fas fa-home-lg-alt text-2xl"></i>
+            <span class="text-[8px] font-black uppercase">Home</span>
+        </button>
+        
+        <button onclick="window.location.href='sell.html'" class="w-16 h-16 gold-bg rounded-full flex items-center justify-center -mt-24 border-[10px] border-[#020617] shadow-2xl active:scale-90 transition-transform">
+            <i class="fas fa-plus text-slate-900 text-2xl"></i>
+        </button>
+        
+        <button onclick="switchTab('settings')" id="settingsTab" class="nav-btn flex flex-col items-center gap-2">
+            <i class="fas fa-shield-virus text-2xl"></i>
+            <span class="text-[8px] font-black uppercase">Vault</span>
+        </button>
+    </nav>
+
+    <div id="logoutModal" class="modal-overlay">
+        <div class="glass-panel p-12 rounded-[3rem] w-full max-w-sm text-center border-white/10">
+            <h3 class="font-black text-2xl gold-text italic mb-3">TERMINATE?</h3>
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-10 leading-relaxed">System session will be encrypted and closed. Active network node will go offline.</p>
+            <button onclick="handleLogout()" id="logoutConfirmBtn" class="w-full bg-white text-black py-5 rounded-2xl font-black text-[11px] uppercase tracking-widest mb-6 flex items-center justify-center gap-4">
+                <span id="logoutText">Confirm Exit</span>
+                <div id="logoutRoll" class="roll-loader text-black"></div>
+            </button>
+            <button onclick="closeModal('logoutModal')" class="text-gray-600 text-[10px] font-black uppercase">Maintain Session</button>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal-overlay">
+        <div class="glass-panel p-12 rounded-[3rem] w-full max-w-sm text-center border-red-500/20">
+            <h3 class="font-black text-2xl text-red-500 italic mb-3">CORE PURGE?</h3>
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-10 leading-relaxed">This node will be permanently erased from the centralized database registry.</p>
+            <button onclick="handleDelete()" id="deleteConfirmBtn" class="w-full bg-red-600 text-white py-5 rounded-2xl font-black text-[11px] uppercase tracking-widest mb-6 flex items-center justify-center gap-4">
+                <span id="deleteText">Execute Purge</span>
+                <div id="deleteRoll" class="roll-loader text-white"></div>
+            </button>
+            <button onclick="closeModal('deleteModal')" class="text-gray-600 text-[10px] font-black uppercase">Abort Mission</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { 
+            getFirestore, 
+            doc, 
+            onSnapshot, 
+            collection, 
+            deleteDoc, 
+            enableIndexedDbPersistence 
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3vDwtittQkvW6Bxseutk-ThHFkrF_K0c",
+            authDomain: "boltrade-40812.firebaseapp.com",
+            projectId: "boltrade-40812",
+            storageBucket: "boltrade-40812.firebasestorage.app",
+            messagingSenderId: "682083427899",
+            appId: "1:682083427899:web:07a8f74c04908dc8f8de1e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const activeId = localStorage.getItem("activeUser");
+
+        try {
+            await enableIndexedDbPersistence(db);
+        } catch (err) {
+            console.warn("Persistence Conflict Active.");
+        }
+
+        if (!activeId) window.location.href = "index.html";
+
+        const assets = [
+            { id: 'AMAZON', name: 'Amazon', img: 'amazon.png' },
+            { id: 'SEPHORA', name: 'Sephora', img: 'sephora.png' },
+            { id: 'APPLE', name: 'Apple Card', img: 'apple.png' },
+            { id: 'RAZER', name: 'Razor Gold', img: 'razer.png' },
+            { id: 'STEAM', name: 'Steam', img: 'steam.png' },
+            { id: 'XBOX', name: 'Xbox', img: 'xbox.png' },
+            { id: 'EBAY', name: 'eBay Card', img: 'ebay.png' },
+            { id: 'ITUNES', name: 'iTunes', img: 'itunes.png' },
+            { id: 'VISA', name: 'Visa Card', img: 'visa.png' },
+            { id: 'FOOTLOCKER', name: 'Footlocker', img: 'footlocker.png' },
+            { id: 'NORDSTROM', name: 'Nordstrom', img: 'nordstrom.png' },
+            { id: 'VANILLA', name: 'One Vanilla', img: 'vanilla.png' },
+            { id: 'AMEX', name: 'Amex', img: 'amex.png' },
+            { id: 'USDT', name: 'USDT', img: 'usdt.png' },
+            { id: 'EBAY', name: 'EBAY', img: 'ebay.png' },
+            { id: 'BITCOIN', name: 'Bitcoin', img: 'btc.png' }
+        ];
+
+        const scaleBalanceText = (balanceStr) => {
+            const display = document.getElementById('userBalance');
+            const length = balanceStr.length;
+            if (length > 18) display.style.fontSize = "1.2rem";
+            else if (length > 15) display.style.fontSize = "1.8rem";
+            else if (length > 12) display.style.fontSize = "2.4rem";
+            else if (length > 9) display.style.fontSize = "3rem";
+            else display.style.fontSize = "4.2rem";
+        };
+
+        const renderPlaceholders = () => {
+            const grid = document.getElementById('marketGrid');
+            grid.innerHTML = Array(6).fill(0).map(() => `
+                <div class="product-card p-8 flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full skeleton mb-4"></div>
+                    <div class="w-16 h-2 rounded skeleton mb-2"></div>
+                </div>
+            `).join('');
+        };
+
+        window.switchTab = (target) => {
+            const views = { home: 'homeView', settings: 'settingsView' };
+            const tabs = { home: 'homeTab', settings: 'settingsTab' };
+            Object.keys(views).forEach(key => {
+                document.getElementById(views[key]).classList.toggle('hidden', key !== target);
+                document.getElementById(tabs[key]).classList.toggle('active', key === target);
+            });
+        };
+
+        const startDataSync = () => {
+            // FIX: STRICT NUMERIC LISTENER
+            onSnapshot(doc(db, "users", activeId), (docSnap) => {
+                if (docSnap.exists()) {
+                    const profile = docSnap.data();
+                    document.getElementById('displayUserName').innerText = (profile.name || "System Operator").toUpperCase();
+                    
+                    const numericBalance = Number(profile.balance || 0);
+                    const rawBal = numericBalance.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    
+                    document.getElementById('userBalance').innerText = rawBal;
+                    scaleBalanceText(rawBal);
+                }
+            });
+
+            onSnapshot(collection(db, "settings"), (snapshot) => {
+                const currentRates = {};
+                snapshot.forEach(doc => currentRates[doc.id] = doc.data().rate);
+
+                let tickerContent = "";
+                let gridContent = "";
+
+                assets.forEach(asset => {
+                    const price = currentRates[asset.id] || 0;
+                    tickerContent += `<span class="px-12 font-bold text-[10px] text-gray-500 uppercase tracking-widest">${asset.name}: <span class="gold-text">₦${price}</span></span>`;
+
+                    gridContent += `
+                        <div onclick="trade('${asset.id}')" class="product-card p-8 flex flex-col items-center gap-2">
+                            <span class="text-[8px] font-black text-amber-500 bg-amber-500/10 px-3 py-1 rounded-full absolute top-4 right-4">₦${price}</span>
+                            <img src="${asset.img}" onerror="this.src='j.png'">
+                            <p class="text-[9px] font-black uppercase text-gray-500 tracking-tighter">${asset.name}</p>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('liveTicker').innerHTML = tickerContent + tickerContent; 
+                document.getElementById('marketGrid').innerHTML = gridContent;
+            });
+        };
+
+        window.handleLogout = async () => {
+            setLoading('logout', true);
+            setTimeout(async () => {
+                try { await signOut(auth); localStorage.clear(); window.location.href = "index.html"; }
+                catch (e) { setLoading('logout', false); }
+            }, 2000);
+        };
+
+        window.handleDelete = async () => {
+            setLoading('delete', true);
+            setTimeout(async () => {
+                try { await deleteDoc(doc(db, "users", activeId)); localStorage.clear(); window.location.href = "index.html"; }
+                catch (e) { setLoading('delete', false); }
+            }, 2500);
+        };
+
+        window.handleSupport = () => {
+            setLoading('support', true);
+            const userName = document.getElementById('displayUserName').innerText || "Valued Client";
+            const userBalance = document.getElementById('userBalance').innerText;
+            
+            setTimeout(() => {
+                const greeting = "Hello Bolt Trade Support Team,";
+                const body = `I am ${userName}, currently accessing my trading terminal. I am reaching out regarding my account (Current Portfolio: ₦${userBalance}). I would appreciate your professional assistance with my recent transaction activities.`;
+                const closing = "Thank you for your prompt and secure service. [Terminal ID: " + activeId.substring(0, 8) + "]";
+                
+                const fullMessage = `${greeting}\n\n${body}\n\n${closing}`;
+                window.location.href = `https://wa.me/2347042607314?text=${encodeURIComponent(fullMessage)}`;
+                
+                setTimeout(() => setLoading('support', false), 1500);
+            }, 2000);
+        };
+
+        const setLoading = (type, isActive) => {
+            const textEl = document.getElementById(`${type}Text`);
+            const rollEl = document.getElementById(`${type}Roll`);
+            const iconEl = document.getElementById(`${type}Icon`);
+            if (textEl) textEl.style.display = isActive ? 'none' : 'block';
+            if (rollEl) rollEl.style.display = isActive ? 'block' : 'none';
+            if (iconEl) iconEl.style.opacity = isActive ? '0' : '1';
+        };
+
+        window.trade = (id) => { localStorage.setItem("selectedAsset", id); window.location.href = "sell.html"; };
+        window.openModal = (id) => document.getElementById(id).style.display = 'flex';
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+
+        renderPlaceholders();
+        setTimeout(startDataSync, 600);
+    </script>
+</body>
+</html>
