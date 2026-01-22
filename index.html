@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bolt Trade | Secure Gateway</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bolt Trade">
+    <link rel="apple-touch-icon" href="j.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#020617">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -22,6 +30,7 @@
             color: white; 
             overflow: hidden; 
             margin: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .gold-text { 
@@ -160,7 +169,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -180,22 +189,30 @@
         const splash = document.getElementById('splash');
         const authView = document.getElementById('authContainer');
 
+        // Solomon - Logic to handle existing user sessions
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                localStorage.setItem("activeUser", user.uid);
+                // Profile safety check
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    window.location.href = "dashboard.html";
+                }
+            }
+        });
+
         window.addEventListener('DOMContentLoaded', async () => {
             const activeSessionId = localStorage.getItem("activeUser");
             
-            // Mandatory 3s Splash
             setTimeout(async () => {
                 if (activeSessionId) {
-                    // VALIDATE IF ACCOUNT STILL EXISTS IN DB
                     try {
                         const userRef = doc(db, "users", activeSessionId);
                         const userSnap = await getDoc(userRef);
-
                         if (userSnap.exists()) {
-                            // Account valid, proceed to dashboard
                             window.location.href = "dashboard.html";
                         } else {
-                            // Account was deleted from DB, clear local memory
                             localStorage.removeItem("activeUser");
                             showAuthView();
                         }
@@ -220,24 +237,17 @@
         window.handleDatabaseLogin = async () => {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value.trim();
-
             if (!email || !pass) return alert("Missing fields");
-
             loader.style.display = 'flex';
-
             try {
                 const q = query(collection(db, "users"), where("email", "==", email));
                 const snap = await getDocs(q);
-
                 if (snap.empty) {
                     loader.style.display = 'none';
                     return alert("Account not found");
                 }
-
-                let userData = null;
-                let uid = null;
+                let userData = null; let uid = null;
                 snap.forEach((d) => { userData = d.data(); uid = d.id; });
-
                 if (userData.password === pass) {
                     localStorage.setItem("activeUser", uid);
                     window.location.href = "dashboard.html";
@@ -251,10 +261,12 @@
             }
         };
 
+        // Solomon - Fixed Google Auth for Mobile Wrappers using Popup logic
         window.googleAuth = async () => {
             loader.style.display = 'flex';
             const provider = new GoogleAuthProvider();
             try {
+                // Using Popup instead of Redirect to prevent state loss in PWA/Median.co
                 const res = await signInWithPopup(auth, provider);
                 const userRef = doc(db, "users", res.user.uid);
                 const userDoc = await getDoc(userRef);
@@ -271,7 +283,8 @@
                 window.location.href = "info.html";
             } catch (err) { 
                 loader.style.display = 'none';
-                alert("Auth Failed"); 
+                console.error(err);
+                alert("Auth Failed: " + err.message); 
             }
         };
     </script>
