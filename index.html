@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bolt Trade | Secure Gateway</title>
+    <title>Bolt Trade | Secure Asset Management</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,81 +14,96 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
         :root {
             --primary-gold: #D4AF37;
             --soft-gold: #F9E29C;
             --deep-gold: #B8860B;
             --bg-dark: #020617;
+            --glass-white: rgba(255, 255, 255, 0.03);
+            --error: #ef4444;
+            --success: #10b981;
         }
 
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: var(--bg-dark); 
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(212, 175, 55, 0.05) 0%, transparent 40%);
             color: white; 
             overflow: hidden; 
             margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Typography & Color Effects */
         .gold-text { 
             background: linear-gradient(135deg, var(--primary-gold) 0%, var(--soft-gold) 50%, var(--deep-gold) 100%); 
             -webkit-background-clip: text; 
             -webkit-text-fill-color: transparent; 
         }
 
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
         .glass-input { 
-            background: rgba(15, 23, 42, 0.8); 
+            background: rgba(255, 255, 255, 0.03); 
             border: 1px solid rgba(255, 255, 255, 0.05); 
             color: white; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .glass-input:focus { 
             border-color: var(--primary-gold); 
+            background: rgba(255, 255, 255, 0.06);
             outline: none; 
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
         }
 
-        /* Solomon - Circular Logo Fix */
         .app-logo { 
-            width: 100px; 
-            height: 100px; 
-            object-fit: cover; 
-            border-radius: 50%; /* Perfect Circle */
+            width: 110px; height: 110px; 
+            object-fit: cover; border-radius: 50%; 
             border: 2px solid var(--primary-gold);
-            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.3)); 
+            padding: 5px; background: var(--bg-dark);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); 
         }
         
-        #splash, #globalLoader { 
-            position: fixed; 
-            inset: 0; 
-            background: var(--bg-dark); 
-            z-index: 1000; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            transition: opacity 0.8s ease-in-out, visibility 0.8s; 
+        /* Overlays & Loaders */
+        #splash, #globalLoader, #notificationToast { 
+            position: fixed; inset: 0; z-index: 1000; 
+            display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; 
+            transition: all 0.8s ease-in-out; 
         }
 
-        #globalLoader { 
-            display: none; 
-            background: rgba(2, 6, 23, 0.95); 
-            z-index: 2000; 
-            backdrop-filter: blur(10px); 
+        #globalLoader { display: none; background: rgba(2, 6, 23, 0.9); z-index: 2000; backdrop-filter: blur(15px); }
+
+        #notificationToast {
+            bottom: 40px; top: auto; height: auto;
+            transform: translateY(150%); opacity: 0;
+            padding: 16px 24px; border-radius: 20px;
+            max-width: 90%; text-align: center;
         }
 
-        .logo-anim { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 
-            0%, 100% { transform: scale(1); opacity: 1; } 
-            50% { transform: scale(1.08); opacity: 0.8; } 
-        }
+        #notificationToast.show { transform: translateY(0); opacity: 1; }
+
+        .logo-anim { animation: pulse 2s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         
         .spinner { 
-            width: 45px; 
-            height: 45px; 
+            width: 40px; height: 40px; 
             border: 3px solid rgba(212, 175, 55, 0.1); 
             border-top-color: var(--primary-gold); 
             border-radius: 50%; 
@@ -96,78 +111,95 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         
+        /* Auth Container */
         #authContainer { 
-            opacity: 0; 
-            transform: translateY(30px); 
+            opacity: 0; transform: translateY(30px); 
             transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); 
-            visibility: hidden;
+            visibility: hidden; width: 100%; max-width: 400px;
         }
 
-        #authContainer.show { 
-            opacity: 1; 
-            transform: translateY(0); 
-            visibility: visible;
+        #authContainer.show { opacity: 1; transform: translateY(0); visibility: visible; }
+
+        .btn-gold {
+            background: white; color: black; font-weight: 800;
+            text-transform: uppercase; font-size: 11px;
+            letter-spacing: 0.1em; transition: 0.4s;
+            cursor: pointer; border-radius: 18px;
         }
 
-        .btn-primary {
-            background: white;
-            color: black;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 0.1em;
-            transition: all 0.3s ease;
-        }
+        .btn-gold:hover { background: var(--primary-gold); transform: translateY(-2px); }
+        .btn-gold:active { transform: scale(0.97); }
 
-        .btn-primary:hover { background: var(--primary-gold); }
-        .btn-primary:active { transform: scale(0.95); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; margin-right: 6px; }
+
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6">
+<body>
+
+    <div id="notificationToast" class="glass-panel border-gold-500/20">
+        <p id="notifyMsg" class="text-xs font-bold uppercase tracking-widest text-white"></p>
+    </div>
 
     <div id="splash">
-        <img src="j.png" class="app-logo logo-anim" alt="Bolt Trade">
-        <p class="mt-8 text-[10px] font-black uppercase tracking-[0.6em] gold-text animate-pulse">Initializing Security</p>
+        <img src="j.png" class="app-logo logo-anim" alt="Logo">
+        <p class="mt-8 text-[10px] font-bold uppercase tracking-[0.5em] gold-text">Initializing Secure Core</p>
     </div>
 
     <div id="globalLoader">
         <div class="spinner"></div>
-        <p id="loaderText" class="mt-6 text-[9px] font-black uppercase tracking-[0.4em] gold-text">Validating Session</p>
+        <p id="loaderText" class="mt-6 text-[9px] font-black uppercase tracking-[0.4em] gold-text">Verifying Authority</p>
     </div>
 
-    <div id="authContainer" class="w-full max-sm:max-w-xs">
-        <div class="text-center mb-10">
-            <img src="j.png" class="app-logo mx-auto mb-4" alt="Bolt Trade">
-            <h1 class="text-3xl font-black gold-text uppercase tracking-tighter">Bolt Trade</h1>
-            <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mt-2">The Digital Standard</p>
-        </div>
-
-        <div class="space-y-4">
-            <div class="relative">
-                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-[10px]"></i>
-                <input type="email" id="email" placeholder="Email Address" class="glass-input w-full rounded-2xl p-4 pl-12 text-sm font-semibold transition-all">
-            </div>
-            
-            <div class="relative">
-                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 text-[10px]"></i>
-                <input type="password" id="password" placeholder="Account Password" class="glass-input w-full rounded-2xl p-4 pl-12 text-sm font-semibold transition-all">
+    <div id="authContainer" class="px-8">
+        <div class="glass-panel p-8 rounded-[40px] relative overflow-hidden">
+            <div class="text-center mb-10">
+                <div class="mb-6 inline-block relative">
+                    <img src="j.png" class="app-logo mx-auto relative z-10">
+                    <div class="absolute inset-0 bg-gold-500 blur-2xl opacity-20"></div>
+                </div>
+                <h1 class="text-3xl font-black gold-text uppercase tracking-tighter">Bolt Trade</h1>
+                <div class="flex items-center justify-center mt-2 space-x-2">
+                    <span class="status-dot"></span>
+                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Server: Online</p>
+                </div>
             </div>
 
-            <button onclick="handleDatabaseLogin()" class="w-full btn-primary py-4 rounded-2xl mt-4">
-                Access Account
-            </button>
+            <div class="space-y-4">
+                <div class="relative group">
+                    <i class="fas fa-envelope absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 text-xs"></i>
+                    <input type="email" id="email" placeholder="EMAIL ADDRESS" class="glass-input w-full rounded-2xl p-4 pl-14 text-[11px] font-bold">
+                </div>
+                
+                <div class="relative group">
+                    <i class="fas fa-lock absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 text-xs"></i>
+                    <input type="password" id="password" placeholder="PASSWORD" class="glass-input w-full rounded-2xl p-4 pl-14 text-[11px] font-bold">
+                </div>
 
-            <button onclick="googleAuth()" class="w-full bg-white/5 border border-white/10 text-white py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-3 mt-4">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4 h-4">
-                Register New
-            </button>
+                <button onclick="handleDatabaseLogin()" class="w-full btn-gold py-5 mt-4 shadow-xl">
+                    Access Portal
+                </button>
+
+                <div class="relative flex items-center py-6">
+                    <div class="flex-grow border-t border-white/5"></div>
+                    <span class="flex-shrink mx-4 text-[8px] text-gray-600 font-black uppercase tracking-widest">Identity Provider</span>
+                    <div class="flex-grow border-t border-white/5"></div>
+                </div>
+
+                <button onclick="googleAuth()" class="w-full bg-white/5 border border-white/10 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-3">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4 h-4">
+                    Continue with Google
+                </button>
+            </div>
+
+            <div class="mt-10 text-center">
+                <p class="text-[8px] text-gray-600 font-bold uppercase tracking-[0.3em]">Encrypted Session (AES-256)</p>
+            </div>
         </div>
-
-        <footer class="text-center mt-12">
-            <p class="text-[9px] text-gray-600 font-bold uppercase tracking-[0.2em]">
-                Protected by End-to-End Encryption
-            </p>
-        </footer>
+        
+        <div class="flex justify-between px-6 mt-8">
+            <a href="#" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest hover:text-white transition">Forgot Key?</a>
+            <a href="#" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest hover:text-white transition">Network Status</a>
+        </div>
     </div>
 
     <script type="module">
@@ -175,6 +207,7 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyA3vDwtittQkvW6Bxseutk-ThHFkrF_K0c",
             authDomain: "boltrade-40812.firebaseapp.com",
@@ -192,96 +225,119 @@
         const splash = document.getElementById('splash');
         const authView = document.getElementById('authContainer');
 
+        // Notification Helper
+        function notify(message, type = 'info') {
+            const toast = document.getElementById('notificationToast');
+            const msg = document.getElementById('notifyMsg');
+            msg.innerText = message;
+            msg.style.color = type === 'error' ? 'var(--error)' : 'white';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Auth Monitor
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                localStorage.setItem("activeUser", user.uid);
                 const userRef = doc(db, "users", user.uid);
                 const userSnap = await getDoc(userRef);
                 if (userSnap.exists()) {
+                    localStorage.setItem("activeUser", user.uid);
                     window.location.href = "dashboard.html";
                 }
             }
         });
 
+        // Initialize App UI
         window.addEventListener('DOMContentLoaded', () => {
-            const activeSessionId = localStorage.getItem("activeUser");
+            const session = localStorage.getItem("activeUser");
             setTimeout(async () => {
-                if (activeSessionId) {
+                if (session) {
                     try {
-                        const userRef = doc(db, "users", activeSessionId);
-                        const userSnap = await getDoc(userRef);
-                        if (userSnap.exists()) {
+                        const snap = await getDoc(doc(db, "users", session));
+                        if (snap.exists()) {
                             window.location.href = "dashboard.html";
-                        } else {
-                            localStorage.removeItem("activeUser");
-                            showAuthView();
+                            return;
                         }
-                    } catch (e) {
-                        localStorage.removeItem("activeUser");
-                        showAuthView();
-                    }
-                } else {
-                    showAuthView();
+                    } catch (e) { console.error(e); }
                 }
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    authView.classList.add('show');
+                }, 800);
             }, 3000);
         });
 
-        function showAuthView() {
-            splash.style.opacity = '0';
-            setTimeout(() => {
-                splash.style.display = 'none';
-                authView.classList.add('show');
-            }, 800);
-        }
-
+        // Database Authentication Logic
         window.handleDatabaseLogin = async () => {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value.trim();
-            if (!email || !pass) return alert("Missing fields");
+            
+            if (!email || !pass) return notify("Missing Credentials", "error");
+            
             loader.style.display = 'flex';
             try {
                 const q = query(collection(db, "users"), where("email", "==", email));
                 const snap = await getDocs(q);
+                
                 if (snap.empty) {
                     loader.style.display = 'none';
-                    return alert("Account not found");
+                    return notify("Identity Not Found", "error");
                 }
-                let userData = null; let uid = null;
-                snap.forEach((d) => { userData = d.data(); uid = d.id; });
-                if (userData.password === pass) {
-                    localStorage.setItem("activeUser", uid);
+
+                let uData = null; let uId = null;
+                snap.forEach((d) => { uData = d.data(); uId = d.id; });
+
+                if (uData.password === pass) {
+                    localStorage.setItem("activeUser", uId);
+                    notify("Access Granted", "success");
                     window.location.href = "dashboard.html";
                 } else {
                     loader.style.display = 'none';
-                    alert("Invalid Password");
+                    notify("Invalid Key", "error");
                 }
             } catch (err) {
                 loader.style.display = 'none';
-                alert("Network Error");
+                notify("Link Error", "error");
             }
         };
 
+        // Google Popup Login
         window.googleAuth = async () => {
-            loader.style.display = 'flex';
             const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+
             try {
-                const res = await signInWithPopup(auth, provider);
-                const userRef = doc(db, "users", res.user.uid);
+                const result = await signInWithPopup(auth, provider);
+                loader.style.display = 'flex';
+                
+                const userRef = doc(db, "users", result.user.uid);
                 const userDoc = await getDoc(userRef);
+
                 if (!userDoc.exists()) {
                     await setDoc(userRef, { 
-                        email: res.user.email, 
+                        email: result.user.email, 
                         balance: 0,
-                        createdAt: new Date().toISOString()
+                        createdAt: new Date().toISOString(),
+                        authProvider: "google"
                     });
+                    localStorage.setItem("activeUser", result.user.uid);
+                    window.location.href = "info.html";
+                } else {
+                    localStorage.setItem("activeUser", result.user.uid);
+                    window.location.href = "dashboard.html";
                 }
-                localStorage.setItem("activeUser", res.user.uid);
-                window.location.href = "info.html";
             } catch (err) { 
                 loader.style.display = 'none';
-                alert("Auth Failed: " + err.message); 
+                if (err.code !== 'auth/popup-closed-by-user') {
+                    notify("Auth Revoked", "error");
+                }
             }
         };
+
+        // Network Status Monitor
+        window.addEventListener('online', () => notify("Connection Restored"));
+        window.addEventListener('offline', () => notify("Connection Lost", "error"));
     </script>
 </body>
 </html>
