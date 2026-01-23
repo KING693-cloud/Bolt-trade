@@ -27,7 +27,6 @@
             --error: #ff4d4d;
         }
 
-        /* Solomon - Advanced Visuals */
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background: var(--bg-dark); 
@@ -41,6 +40,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Solomon - Advanced Visual Effects */
         .gold-text { 
             background: linear-gradient(135deg, var(--primary-gold) 0%, var(--soft-gold) 50%, var(--deep-gold) 100%); 
             -webkit-background-clip: text; 
@@ -49,14 +49,9 @@
 
         .glass-panel {
             background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
         }
 
         .glass-input { 
@@ -64,79 +59,80 @@
             border: 1px solid rgba(255, 255, 255, 0.05); 
             color: white; 
             width: 100%;
-            padding: 18px 20px 18px 55px;
-            border-radius: 20px;
+            padding: 20px 20px 20px 60px;
+            border-radius: 24px;
             font-size: 13px;
             font-weight: 600;
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .glass-input:focus { 
             border-color: var(--primary-gold); 
             background: rgba(255, 255, 255, 0.07);
             outline: none; 
-            box-shadow: 0 0 25px rgba(212, 175, 55, 0.15);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
         }
 
         .app-logo { 
             width: 110px; height: 110px; 
             object-fit: cover; border-radius: 50%; 
             border: 2px solid var(--primary-gold);
-            padding: 5px; background: var(--bg-dark);
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.25); 
+            padding: 4px; background: var(--bg-dark);
+            box-shadow: 0 0 35px rgba(212, 175, 55, 0.25); 
         }
         
-        /* Solomon - Heavy Loading Overlays */
+        /* Solomon - Heavy UI Elements */
         #splash, #globalLoader, #errorToast { 
             position: fixed; inset: 0; z-index: 1000; 
             display: flex; flex-direction: column; 
             align-items: center; justify-content: center; 
-            transition: all 0.8s ease-in-out; 
+            transition: all 1s ease-in-out; 
         }
 
-        #globalLoader { display: none; background: rgba(2, 6, 23, 0.95); z-index: 2000; backdrop-filter: blur(15px); }
+        #globalLoader { display: none; background: rgba(2, 6, 23, 0.98); z-index: 2000; }
 
         #errorToast {
             bottom: 40px; top: auto; height: auto;
-            transform: translateY(200%); opacity: 0;
-            padding: 15px 25px; border-radius: 20px;
-            background: rgba(255, 77, 77, 0.1);
-            border: 1px solid rgba(255, 77, 77, 0.2);
-            color: var(--error); font-size: 11px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 1px;
+            transform: translateY(250%); opacity: 0;
+            padding: 16px 28px; border-radius: 22px;
+            background: rgba(255, 77, 77, 0.15);
+            border: 1px solid rgba(255, 77, 77, 0.3);
+            color: white; font-size: 11px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            backdrop-filter: blur(10px);
         }
 
         #errorToast.active { transform: translateY(0); opacity: 1; }
 
         .spinner { 
-            width: 50px; height: 50px; 
-            border: 3px solid rgba(212, 175, 55, 0.1); 
+            width: 55px; height: 55px; 
+            border: 4px solid rgba(212, 175, 55, 0.1); 
             border-top-color: var(--primary-gold); 
             border-radius: 50%; 
-            animation: spin 0.8s linear infinite; 
+            animation: spin 1s linear infinite; 
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
         
         #authContainer { 
-            opacity: 0; transform: scale(0.95);
-            transition: 1.2s cubic-bezier(0.16, 1, 0.3, 1); 
-            visibility: hidden; width: 100%; max-width: 420px;
+            opacity: 0; transform: scale(0.92) translateY(20px);
+            transition: 1.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            visibility: hidden; width: 100%; max-width: 440px;
         }
 
-        #authContainer.show { opacity: 1; transform: scale(1); visibility: visible; }
+        #authContainer.show { opacity: 1; transform: scale(1) translateY(0); visibility: visible; }
 
         .btn-main {
             background: white; color: black; font-weight: 800;
             text-transform: uppercase; font-size: 12px;
-            letter-spacing: 2px; transition: 0.4s;
-            cursor: pointer; border-radius: 20px;
-            width: 100%; padding: 20px;
+            letter-spacing: 2px; transition: 0.5s;
+            cursor: pointer; border-radius: 22px;
+            width: 100%; padding: 22px;
+            box-shadow: 0 10px 20px -5px rgba(255, 255, 255, 0.2);
         }
 
-        .btn-main:hover { background: var(--primary-gold); transform: translateY(-3px); }
+        .btn-main:hover { background: var(--primary-gold); transform: translateY(-4px); }
 
-        /* Solomon - Background Particles Effect */
         #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
     </style>
 </head>
@@ -144,65 +140,74 @@
 
     <canvas id="bg-canvas"></canvas>
 
-    <div id="errorToast">System Error: Initial State Missing</div>
+    <div id="errorToast">Verification Fault: Initial State Missing</div>
 
     <div id="splash">
         <img src="j.png" class="app-logo animate-pulse">
-        <div class="mt-10 flex flex-col items-center">
-            <p class="text-[10px] font-black uppercase tracking-[0.7em] gold-text">Encrypted Access</p>
-            <div class="w-32 h-[1px] bg-white/10 mt-4 overflow-hidden">
-                <div class="h-full bg-gold-500 w-full -translate-x-full animate-[progress_3s_infinite]"></div>
+        <div class="mt-12 text-center">
+            <p class="text-[11px] font-black uppercase tracking-[0.8em] gold-text">Encrypted Access</p>
+            <div class="w-40 h-[1.5px] bg-white/10 mt-6 overflow-hidden relative">
+                <div class="absolute inset-0 bg-gold-500 w-full -translate-x-full animate-[progress_4s_infinite]"></div>
             </div>
         </div>
     </div>
 
     <div id="globalLoader">
         <div class="spinner"></div>
-        <p class="mt-8 text-[9px] font-black uppercase tracking-[0.4em] gold-text">Synchronizing Session</p>
+        <p class="mt-10 text-[10px] font-black uppercase tracking-[0.5em] gold-text">Syncing Authority</p>
     </div>
 
     <div id="authContainer" class="px-6">
-        <div class="glass-panel p-10 rounded-[45px] relative overflow-hidden">
+        <div class="glass-panel p-12 rounded-[50px] relative overflow-hidden">
             
-            <div class="text-center mb-10">
-                <img src="j.png" class="app-logo mx-auto mb-6">
-                <h1 class="text-4xl font-black gold-text italic tracking-tighter">BOLT TRADE</h1>
-                <p class="text-gray-500 text-[9px] font-bold uppercase tracking-[0.5em] mt-3">Quantum Security Protocol</p>
+            <div class="text-center mb-12">
+                <div class="relative inline-block mb-8">
+                    <img src="j.png" class="app-logo mx-auto relative z-10">
+                    <div class="absolute inset-0 bg-gold-500 blur-3xl opacity-20"></div>
+                </div>
+                <h1 class="text-4xl font-black gold-text italic tracking-tighter uppercase">Bolt Trade</h1>
+                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-[0.4em] mt-4 flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    Terminal Secure
+                </p>
             </div>
 
-            <div class="space-y-4">
-                <div class="input-group">
-                    <i class="fas fa-user-shield absolute left-6 top-1/2 -translate-y-1/2 text-gray-600"></i>
-                    <input type="email" id="email" placeholder="OPERATOR ID" class="glass-input uppercase">
+            <div class="space-y-5">
+                <div class="relative group">
+                    <i class="fas fa-user-shield absolute left-7 top-1/2 -translate-y-1/2 text-gray-600 transition-colors group-focus-within:text-gold-500"></i>
+                    <input type="email" id="email" placeholder="OPERATOR IDENTIFIER" class="glass-input uppercase tracking-wider">
                 </div>
                 
-                <div class="input-group">
-                    <i class="fas fa-fingerprint absolute left-6 top-1/2 -translate-y-1/2 text-gray-600"></i>
-                    <input type="password" id="password" placeholder="SECURE PIN" class="glass-input">
+                <div class="relative group">
+                    <i class="fas fa-fingerprint absolute left-7 top-1/2 -translate-y-1/2 text-gray-600 transition-colors group-focus-within:text-gold-500"></i>
+                    <input type="password" id="password" placeholder="SECURITY CODE" class="glass-input">
                 </div>
 
-                <button onclick="handleManualLogin()" class="btn-main shadow-2xl shadow-gold-500/10">
+                <button onclick="handleManualLogin()" class="btn-main mt-4">
                     Authorize Entry
                 </button>
 
-                <div class="relative flex items-center py-6">
+                <div class="relative flex items-center py-8">
                     <div class="flex-grow border-t border-white/5"></div>
-                    <span class="mx-4 text-[8px] text-gray-700 font-black uppercase tracking-widest">Global Auth</span>
+                    <span class="mx-5 text-[9px] text-gray-700 font-black uppercase tracking-[0.3em]">External Auth</span>
                     <div class="flex-grow border-t border-white/5"></div>
                 </div>
 
-                <button onclick="googleAuth()" class="w-full bg-white/5 border border-white/10 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-4">
+                <button onclick="googleAuth()" class="w-full bg-white/5 border border-white/10 text-white py-5 rounded-[22px] font-black uppercase text-[11px] tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-5">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
                     Connect via Cloud
                 </button>
             </div>
 
-            <div class="mt-12 pt-8 border-t border-white/5 text-center">
-                <div class="flex justify-center gap-4 text-gray-600 text-[10px]">
-                    <span><i class="fas fa-wifi text-green-500 mr-1"></i> NODE_01</span>
-                    <span><i class="fas fa-lock text-gold-500 mr-1"></i> SSL_ACTIVE</span>
-                </div>
+            <div class="mt-14 pt-10 border-t border-white/5 text-center flex flex-wrap justify-center gap-8">
+                <div class="text-gray-600 text-[9px] font-bold uppercase tracking-widest"><i class="fas fa-server mr-2 text-gold-500"></i>NODE_01_PROX</div>
+                <div class="text-gray-600 text-[9px] font-bold uppercase tracking-widest"><i class="fas fa-microchip mr-2 text-gold-500"></i>AES_256</div>
             </div>
+        </div>
+        
+        <div class="mt-10 flex justify-between px-8 text-gray-600 font-black text-[9px] uppercase tracking-[0.4em]">
+            <span class="hover:text-white transition cursor-pointer">Support</span>
+            <span class="hover:text-white transition cursor-pointer">Protocol: v4.2</span>
         </div>
     </div>
 
@@ -211,10 +216,10 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Solomon - Final Domain Configuration
+        // Solomon - Config with Domain Fix
         const firebaseConfig = {
             apiKey: "AIzaSyA3vDwtittQkvW6Bxseutk-ThHFkrF_K0c",
-            authDomain: "king693-cloud.github.io", // Solomon - Critical Fix for GitHub Pages
+            authDomain: "king693-cloud.github.io", // Solomon - Correcting to github.io root
             projectId: "boltrade-40812",
             storageBucket: "boltrade-40812.firebasestorage.app",
             messagingSenderId: "682083427899",
@@ -225,7 +230,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Solomon - Persistence Logic (Fixes "Forgotten" login)
+        // Solomon - Essential Session Persistence
         setPersistence(auth, browserLocalPersistence);
 
         const loader = document.getElementById('globalLoader');
@@ -236,13 +241,14 @@
             const toast = document.getElementById('errorToast');
             toast.innerText = msg;
             toast.classList.add('active');
-            setTimeout(() => toast.classList.remove('active'), 4000);
+            setTimeout(() => toast.classList.remove('active'), 5000);
         }
 
-        // Auth Monitor Solomon
+        // Auth Guardian Solomon
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const snap = await getDoc(doc(db, "users", user.uid));
+                const userRef = doc(db, "users", user.uid);
+                const snap = await getDoc(userRef);
                 if (snap.exists()) {
                     localStorage.setItem("activeUser", user.uid);
                     window.location.href = "dashboard.html";
@@ -250,60 +256,52 @@
             }
         });
 
-        // Background Animation Solomon
+        // Background Core Solomon
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+        window.addEventListener('resize', resize);
+        resize();
 
         class Particle {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2;
-                this.speedX = Math.random() * 0.5 - 0.25;
-                this.speedY = Math.random() * 0.5 - 0.25;
+                this.size = Math.random() * 2.5;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.4 - 0.2;
             }
             update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x > canvas.width) this.x = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.y < 0) this.y = canvas.height;
+                this.x += this.speedX; this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0; else if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0; else if (this.y < 0) this.y = canvas.height;
             }
             draw() {
-                ctx.fillStyle = 'rgba(212, 175, 55, 0.2)';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = 'rgba(212, 175, 55, 0.15)';
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             }
         }
-
-        function initParticles() {
-            for (let i = 0; i < 50; i++) particles.push(new Particle());
-        }
-
+        for (let i = 0; i < 65; i++) particles.push(new Particle());
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
-        initParticles(); animate();
+        animate();
 
-        // App Start Solomon
+        // Boot Sequence Solomon
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 splash.style.opacity = '0';
                 setTimeout(() => {
                     splash.style.display = 'none';
                     authView.classList.add('show');
-                }, 800);
-            }, 3500);
+                }, 1000);
+            }, 4500);
         });
 
-        // Manual Security Logic Solomon
+        // Secure Login Solomon
         window.handleManualLogin = async () => {
             const email = document.getElementById('email').value.trim();
             const pin = document.getElementById('password').value.trim();
@@ -315,12 +313,12 @@
                 const snap = await getDocs(q);
                 if (snap.empty) {
                     loader.style.display = 'none';
-                    return showError("Access Denied: User Unknown");
+                    return showError("Identity Unknown");
                 }
-                let data = null; let uid = null;
-                snap.forEach(d => { data = d.data(); uid = d.id; });
-                if (data.password === pin) {
-                    localStorage.setItem("activeUser", uid);
+                let uData = null; let uId = null;
+                snap.forEach(d => { uData = d.data(); uId = d.id; });
+                if (uData.password === pin) {
+                    localStorage.setItem("activeUser", uId);
                     window.location.href = "dashboard.html";
                 } else {
                     loader.style.display = 'none';
@@ -328,21 +326,19 @@
                 }
             } catch (e) {
                 loader.style.display = 'none';
-                showError("Network Timeout");
+                showError("System Unavailable");
             }
         };
 
-        // GOOGLE POPUP - THE FIXED Solomon LOGIC
+        // THE Solomon GOOGLE POPUP FIX
         window.googleAuth = async () => {
             const provider = new GoogleAuthProvider();
-            // This forces the session check to happen BEFORE the window opens Solomon
             provider.setCustomParameters({ prompt: 'select_account' });
 
             try {
-                // Ensure persistence is ready Solomon
+                // Ensure persistence is activated before pop-up Solomon
                 await setPersistence(auth, browserLocalPersistence);
                 
-                // This is the specific part that Median.co and GitHub need Solomon
                 const result = await signInWithPopup(auth, provider);
                 loader.style.display = 'flex';
                 
@@ -353,8 +349,7 @@
                     await setDoc(userRef, { 
                         email: result.user.email, 
                         balance: 0, 
-                        role: "user",
-                        joined: new Date().toISOString() 
+                        createdAt: new Date().toISOString() 
                     });
                     localStorage.setItem("activeUser", result.user.uid);
                     window.location.href = "info.html";
@@ -364,11 +359,12 @@
                 }
             } catch (err) {
                 loader.style.display = 'none';
-                console.error("Firebase Error:", err.code);
                 if (err.code === 'auth/popup-closed-by-user') {
-                    showError("Authentication Cancelled");
+                    showError("Sync Cancelled");
+                } else if (err.code === 'auth/unauthorized-domain') {
+                    showError("Domain Not Whitelisted in Firebase");
                 } else {
-                    showError("State Sync Failed: check authorized domains");
+                    showError("Auth Error: Solomon, check Firebase Domains!");
                 }
             }
         };
