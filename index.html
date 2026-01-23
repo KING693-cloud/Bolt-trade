@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bolt Trade | Secure Asset Management</title>
+    <title>Bolt Trade | Institutional Gateway</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,17 +23,14 @@
             --soft-gold: #F9E29C;
             --deep-gold: #B8860B;
             --bg-dark: #020617;
-            --glass-white: rgba(255, 255, 255, 0.03);
-            --error: #ef4444;
-            --success: #10b981;
+            --glass: rgba(255, 255, 255, 0.03);
+            --error: #ff4d4d;
         }
 
+        /* Solomon - Advanced Visuals */
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: var(--bg-dark); 
-            background-image: 
-                radial-gradient(circle at 0% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(212, 175, 55, 0.05) 0%, transparent 40%);
+            background: var(--bg-dark); 
             color: white; 
             overflow: hidden; 
             margin: 0;
@@ -44,7 +41,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Typography & Color Effects */
         .gold-text { 
             background: linear-gradient(135deg, var(--primary-gold) 0%, var(--soft-gold) 50%, var(--deep-gold) 100%); 
             -webkit-background-clip: text; 
@@ -52,24 +48,34 @@
         }
 
         .glass-panel {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
         }
 
         .glass-input { 
-            background: rgba(255, 255, 255, 0.03); 
+            background: var(--glass); 
             border: 1px solid rgba(255, 255, 255, 0.05); 
             color: white; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            padding: 18px 20px 18px 55px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .glass-input:focus { 
             border-color: var(--primary-gold); 
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.07);
             outline: none; 
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.15);
         }
 
         .app-logo { 
@@ -77,140 +83,138 @@
             object-fit: cover; border-radius: 50%; 
             border: 2px solid var(--primary-gold);
             padding: 5px; background: var(--bg-dark);
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); 
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.25); 
         }
         
-        /* Overlays & Loaders */
-        #splash, #globalLoader, #notificationToast { 
+        /* Solomon - Heavy Loading Overlays */
+        #splash, #globalLoader, #errorToast { 
             position: fixed; inset: 0; z-index: 1000; 
             display: flex; flex-direction: column; 
             align-items: center; justify-content: center; 
             transition: all 0.8s ease-in-out; 
         }
 
-        #globalLoader { display: none; background: rgba(2, 6, 23, 0.9); z-index: 2000; backdrop-filter: blur(15px); }
+        #globalLoader { display: none; background: rgba(2, 6, 23, 0.95); z-index: 2000; backdrop-filter: blur(15px); }
 
-        #notificationToast {
+        #errorToast {
             bottom: 40px; top: auto; height: auto;
-            transform: translateY(150%); opacity: 0;
-            padding: 16px 24px; border-radius: 20px;
-            max-width: 90%; text-align: center;
+            transform: translateY(200%); opacity: 0;
+            padding: 15px 25px; border-radius: 20px;
+            background: rgba(255, 77, 77, 0.1);
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            color: var(--error); font-size: 11px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px;
         }
 
-        #notificationToast.show { transform: translateY(0); opacity: 1; }
+        #errorToast.active { transform: translateY(0); opacity: 1; }
 
-        .logo-anim { animation: pulse 2s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        
         .spinner { 
-            width: 40px; height: 40px; 
+            width: 50px; height: 50px; 
             border: 3px solid rgba(212, 175, 55, 0.1); 
             border-top-color: var(--primary-gold); 
             border-radius: 50%; 
             animation: spin 0.8s linear infinite; 
         }
+
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* Auth Container */
         #authContainer { 
-            opacity: 0; transform: translateY(30px); 
-            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); 
-            visibility: hidden; width: 100%; max-width: 400px;
+            opacity: 0; transform: scale(0.95);
+            transition: 1.2s cubic-bezier(0.16, 1, 0.3, 1); 
+            visibility: hidden; width: 100%; max-width: 420px;
         }
 
-        #authContainer.show { opacity: 1; transform: translateY(0); visibility: visible; }
+        #authContainer.show { opacity: 1; transform: scale(1); visibility: visible; }
 
-        .btn-gold {
+        .btn-main {
             background: white; color: black; font-weight: 800;
-            text-transform: uppercase; font-size: 11px;
-            letter-spacing: 0.1em; transition: 0.4s;
-            cursor: pointer; border-radius: 18px;
+            text-transform: uppercase; font-size: 12px;
+            letter-spacing: 2px; transition: 0.4s;
+            cursor: pointer; border-radius: 20px;
+            width: 100%; padding: 20px;
         }
 
-        .btn-gold:hover { background: var(--primary-gold); transform: translateY(-2px); }
-        .btn-gold:active { transform: scale(0.97); }
+        .btn-main:hover { background: var(--primary-gold); transform: translateY(-3px); }
 
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; margin-right: 6px; }
-
+        /* Solomon - Background Particles Effect */
+        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
     </style>
 </head>
 <body>
 
-    <div id="notificationToast" class="glass-panel border-gold-500/20">
-        <p id="notifyMsg" class="text-xs font-bold uppercase tracking-widest text-white"></p>
-    </div>
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="errorToast">System Error: Initial State Missing</div>
 
     <div id="splash">
-        <img src="j.png" class="app-logo logo-anim" alt="Logo">
-        <p class="mt-8 text-[10px] font-bold uppercase tracking-[0.5em] gold-text">Initializing Secure Core</p>
+        <img src="j.png" class="app-logo animate-pulse">
+        <div class="mt-10 flex flex-col items-center">
+            <p class="text-[10px] font-black uppercase tracking-[0.7em] gold-text">Encrypted Access</p>
+            <div class="w-32 h-[1px] bg-white/10 mt-4 overflow-hidden">
+                <div class="h-full bg-gold-500 w-full -translate-x-full animate-[progress_3s_infinite]"></div>
+            </div>
+        </div>
     </div>
 
     <div id="globalLoader">
         <div class="spinner"></div>
-        <p id="loaderText" class="mt-6 text-[9px] font-black uppercase tracking-[0.4em] gold-text">Verifying Authority</p>
+        <p class="mt-8 text-[9px] font-black uppercase tracking-[0.4em] gold-text">Synchronizing Session</p>
     </div>
 
-    <div id="authContainer" class="px-8">
-        <div class="glass-panel p-8 rounded-[40px] relative overflow-hidden">
+    <div id="authContainer" class="px-6">
+        <div class="glass-panel p-10 rounded-[45px] relative overflow-hidden">
+            
             <div class="text-center mb-10">
-                <div class="mb-6 inline-block relative">
-                    <img src="j.png" class="app-logo mx-auto relative z-10">
-                    <div class="absolute inset-0 bg-gold-500 blur-2xl opacity-20"></div>
-                </div>
-                <h1 class="text-3xl font-black gold-text uppercase tracking-tighter">Bolt Trade</h1>
-                <div class="flex items-center justify-center mt-2 space-x-2">
-                    <span class="status-dot"></span>
-                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Server: Online</p>
-                </div>
+                <img src="j.png" class="app-logo mx-auto mb-6">
+                <h1 class="text-4xl font-black gold-text italic tracking-tighter">BOLT TRADE</h1>
+                <p class="text-gray-500 text-[9px] font-bold uppercase tracking-[0.5em] mt-3">Quantum Security Protocol</p>
             </div>
 
             <div class="space-y-4">
-                <div class="relative group">
-                    <i class="fas fa-envelope absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 text-xs"></i>
-                    <input type="email" id="email" placeholder="EMAIL ADDRESS" class="glass-input w-full rounded-2xl p-4 pl-14 text-[11px] font-bold">
+                <div class="input-group">
+                    <i class="fas fa-user-shield absolute left-6 top-1/2 -translate-y-1/2 text-gray-600"></i>
+                    <input type="email" id="email" placeholder="OPERATOR ID" class="glass-input uppercase">
                 </div>
                 
-                <div class="relative group">
-                    <i class="fas fa-lock absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 text-xs"></i>
-                    <input type="password" id="password" placeholder="PASSWORD" class="glass-input w-full rounded-2xl p-4 pl-14 text-[11px] font-bold">
+                <div class="input-group">
+                    <i class="fas fa-fingerprint absolute left-6 top-1/2 -translate-y-1/2 text-gray-600"></i>
+                    <input type="password" id="password" placeholder="SECURE PIN" class="glass-input">
                 </div>
 
-                <button onclick="handleDatabaseLogin()" class="w-full btn-gold py-5 mt-4 shadow-xl">
-                    Access Portal
+                <button onclick="handleManualLogin()" class="btn-main shadow-2xl shadow-gold-500/10">
+                    Authorize Entry
                 </button>
 
                 <div class="relative flex items-center py-6">
                     <div class="flex-grow border-t border-white/5"></div>
-                    <span class="flex-shrink mx-4 text-[8px] text-gray-600 font-black uppercase tracking-widest">Identity Provider</span>
+                    <span class="mx-4 text-[8px] text-gray-700 font-black uppercase tracking-widest">Global Auth</span>
                     <div class="flex-grow border-t border-white/5"></div>
                 </div>
 
-                <button onclick="googleAuth()" class="w-full bg-white/5 border border-white/10 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-3">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4 h-4">
-                    Continue with Google
+                <button onclick="googleAuth()" class="w-full bg-white/5 border border-white/10 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-4">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
+                    Connect via Cloud
                 </button>
             </div>
 
-            <div class="mt-10 text-center">
-                <p class="text-[8px] text-gray-600 font-bold uppercase tracking-[0.3em]">Encrypted Session (AES-256)</p>
+            <div class="mt-12 pt-8 border-t border-white/5 text-center">
+                <div class="flex justify-center gap-4 text-gray-600 text-[10px]">
+                    <span><i class="fas fa-wifi text-green-500 mr-1"></i> NODE_01</span>
+                    <span><i class="fas fa-lock text-gold-500 mr-1"></i> SSL_ACTIVE</span>
+                </div>
             </div>
-        </div>
-        
-        <div class="flex justify-between px-6 mt-8">
-            <a href="#" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest hover:text-white transition">Forgot Key?</a>
-            <a href="#" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest hover:text-white transition">Network Status</a>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Configuration
+        // Solomon - Final Domain Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyA3vDwtittQkvW6Bxseutk-ThHFkrF_K0c",
-            authDomain: "boltrade-40812.firebaseapp.com",
+            authDomain: "king693-cloud.github.io", // Solomon - Critical Fix for GitHub Pages
             projectId: "boltrade-40812",
             storageBucket: "boltrade-40812.firebasestorage.app",
             messagingSenderId: "682083427899",
@@ -221,93 +225,124 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // Solomon - Persistence Logic (Fixes "Forgotten" login)
+        setPersistence(auth, browserLocalPersistence);
+
         const loader = document.getElementById('globalLoader');
         const splash = document.getElementById('splash');
         const authView = document.getElementById('authContainer');
 
-        // Notification Helper
-        function notify(message, type = 'info') {
-            const toast = document.getElementById('notificationToast');
-            const msg = document.getElementById('notifyMsg');
-            msg.innerText = message;
-            msg.style.color = type === 'error' ? 'var(--error)' : 'white';
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+        function showError(msg) {
+            const toast = document.getElementById('errorToast');
+            toast.innerText = msg;
+            toast.classList.add('active');
+            setTimeout(() => toast.classList.remove('active'), 4000);
         }
 
-        // Auth Monitor
+        // Auth Monitor Solomon
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const userRef = doc(db, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if (snap.exists()) {
                     localStorage.setItem("activeUser", user.uid);
                     window.location.href = "dashboard.html";
                 }
             }
         });
 
-        // Initialize App UI
+        // Background Animation Solomon
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(212, 175, 55, 0.2)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < 50; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+        initParticles(); animate();
+
+        // App Start Solomon
         window.addEventListener('DOMContentLoaded', () => {
-            const session = localStorage.getItem("activeUser");
-            setTimeout(async () => {
-                if (session) {
-                    try {
-                        const snap = await getDoc(doc(db, "users", session));
-                        if (snap.exists()) {
-                            window.location.href = "dashboard.html";
-                            return;
-                        }
-                    } catch (e) { console.error(e); }
-                }
+            setTimeout(() => {
                 splash.style.opacity = '0';
                 setTimeout(() => {
                     splash.style.display = 'none';
                     authView.classList.add('show');
                 }, 800);
-            }, 3000);
+            }, 3500);
         });
 
-        // Database Authentication Logic
-        window.handleDatabaseLogin = async () => {
+        // Manual Security Logic Solomon
+        window.handleManualLogin = async () => {
             const email = document.getElementById('email').value.trim();
-            const pass = document.getElementById('password').value.trim();
-            
-            if (!email || !pass) return notify("Missing Credentials", "error");
-            
+            const pin = document.getElementById('password').value.trim();
+            if (!email || !pin) return showError("Credentials Required");
+
             loader.style.display = 'flex';
             try {
                 const q = query(collection(db, "users"), where("email", "==", email));
                 const snap = await getDocs(q);
-                
                 if (snap.empty) {
                     loader.style.display = 'none';
-                    return notify("Identity Not Found", "error");
+                    return showError("Access Denied: User Unknown");
                 }
-
-                let uData = null; let uId = null;
-                snap.forEach((d) => { uData = d.data(); uId = d.id; });
-
-                if (uData.password === pass) {
-                    localStorage.setItem("activeUser", uId);
-                    notify("Access Granted", "success");
+                let data = null; let uid = null;
+                snap.forEach(d => { data = d.data(); uid = d.id; });
+                if (data.password === pin) {
+                    localStorage.setItem("activeUser", uid);
                     window.location.href = "dashboard.html";
                 } else {
                     loader.style.display = 'none';
-                    notify("Invalid Key", "error");
+                    showError("Invalid PIN Code");
                 }
-            } catch (err) {
+            } catch (e) {
                 loader.style.display = 'none';
-                notify("Link Error", "error");
+                showError("Network Timeout");
             }
         };
 
-        // Google Popup Login
+        // GOOGLE POPUP - THE FIXED Solomon LOGIC
         window.googleAuth = async () => {
             const provider = new GoogleAuthProvider();
+            // This forces the session check to happen BEFORE the window opens Solomon
             provider.setCustomParameters({ prompt: 'select_account' });
 
             try {
+                // Ensure persistence is ready Solomon
+                await setPersistence(auth, browserLocalPersistence);
+                
+                // This is the specific part that Median.co and GitHub need Solomon
                 const result = await signInWithPopup(auth, provider);
                 loader.style.display = 'flex';
                 
@@ -317,9 +352,9 @@
                 if (!userDoc.exists()) {
                     await setDoc(userRef, { 
                         email: result.user.email, 
-                        balance: 0,
-                        createdAt: new Date().toISOString(),
-                        authProvider: "google"
+                        balance: 0, 
+                        role: "user",
+                        joined: new Date().toISOString() 
                     });
                     localStorage.setItem("activeUser", result.user.uid);
                     window.location.href = "info.html";
@@ -327,17 +362,16 @@
                     localStorage.setItem("activeUser", result.user.uid);
                     window.location.href = "dashboard.html";
                 }
-            } catch (err) { 
+            } catch (err) {
                 loader.style.display = 'none';
-                if (err.code !== 'auth/popup-closed-by-user') {
-                    notify("Auth Revoked", "error");
+                console.error("Firebase Error:", err.code);
+                if (err.code === 'auth/popup-closed-by-user') {
+                    showError("Authentication Cancelled");
+                } else {
+                    showError("State Sync Failed: check authorized domains");
                 }
             }
         };
-
-        // Network Status Monitor
-        window.addEventListener('online', () => notify("Connection Restored"));
-        window.addEventListener('offline', () => notify("Connection Lost", "error"));
     </script>
 </body>
 </html>
